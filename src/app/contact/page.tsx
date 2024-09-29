@@ -1,7 +1,7 @@
 import React from 'react';
 import ContactForm from '@/components/ContactForm';
 import { Container, Typography, Box } from '@mui/material';
-
+export const runtime = 'edge';
 const ContactPage: React.FC = () => {
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>

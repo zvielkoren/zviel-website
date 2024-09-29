@@ -2,7 +2,7 @@
   import Link from 'next/link';
   import { FaGithub } from 'react-icons/fa';
   import { Octokit } from '@octokit/rest';
-
+  export const runtime = 'edge';
   const ProjectsPage = async () => {
     const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
