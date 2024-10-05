@@ -46,7 +46,7 @@
 
     useEffect(() => {
       fetchProjects();
-      const interval = setInterval(fetchProjects, 5000);
+      const interval = setInterval(fetchProjects, Number(process.env.TimeOuteFetch) || 60000);
       return () => clearInterval(interval);
     }, []);
 
