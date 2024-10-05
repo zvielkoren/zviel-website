@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Box, TextField, Typography, Button } from '@mui/material';
 import { useForm, SubmitHandler } from 'react-hook-form';
+import emailjs from 'emailjs-com';
 
 // Define the shape of the form data
 interface FormData {
@@ -19,19 +20,20 @@ const ContactForm = () => {
   // Change the type of onSubmit to SubmitHandler<FormData>
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     try {
-      const response = await fetch('/api/sendEmail', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
+      const templateParams = {
+        from_name: data.name,
+        from_email: data.email,
+        message: data.message,
+      };
 
-      if (response.ok) {
-        setIsSubmitted(true);
-      } else {
-        console.error('Failed to send email');
-      }
+      // Replace these with your EmailJS keys
+      const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
+      const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
+      const userId = process.env.NEXT_PUBLIC_EMAILJS_USER_ID;
+
+      await emailjs.send(serviceId!, templateId!, templateParams, userId!);
+      
+      setIsSubmitted(true);
     } catch (error) {
       console.error('Error sending email:', error);
     }
