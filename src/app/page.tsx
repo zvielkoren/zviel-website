@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Button } from "@nextui-org/react";
 import Link from "next/link";
-export const runtime = "edge";
+
 
 export default function Home() {
   return (
@@ -12,7 +12,7 @@ export default function Home() {
       </header>
 
       <section className="flex flex-col items-center">
-        <Image
+        {/* <Image
           src="/profile-picture.png"
           alt="Zviel Koren"
           width={200}
@@ -20,7 +20,7 @@ export default function Home() {
           className="rounded-full mb-8"
           draggable="false"
   
-        />
+        /> */}
         <p className="text-center max-w-2xl mb-8">
           Hi, I'm Zviel Koren, a passionate full stack developer with expertise in modern web technologies.
           I love creating efficient, scalable, and user-friendly applications.
@@ -44,6 +44,7 @@ export default function Home() {
           <li className="bg-gray-700 rounded-full px-4 py-2">C#</li>
           <li className="bg-gray-700 rounded-full px-4 py-2">Java</li>
           <li className="bg-gray-700 rounded-full px-4 py-2">Kotlin</li>
+          <li className="bg-gray-700 rounded-full px-4 py-2">etc</li>
         </ul>
       </section>
 
@@ -55,7 +56,7 @@ export default function Home() {
       </section>
 
       <footer className="mt-16 text-center">
-        <p>© {new Date().getFullYear()} Zviel Koren. All rights reserved.</p>
+        <p>© 2021 - {new Date().getFullYear()} Zviel Koren. All rights reserved.</p>
       </footer>
     </main>
   );

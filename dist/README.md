@@ -1,0 +1,1 @@
+This folder contains the built output assets for the worker "zviel-website" generated at 2024-09-29T19:41:10.088Z.
