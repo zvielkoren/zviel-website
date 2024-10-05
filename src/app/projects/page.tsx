@@ -36,7 +36,7 @@
           fetchedProjects.push(...userProjects);
         }
 
-        setProjects(fetchedProjects);
+        
       } catch (error) {
         console.error('Error fetching projects:', error);
       }
