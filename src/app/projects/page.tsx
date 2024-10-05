@@ -4,19 +4,21 @@
   import { FaGithub } from 'react-icons/fa';
   import { Octokit } from '@octokit/rest';
 
+  interface Project {
+    name: string;
+    description: string;
+    githubLink: string;
+    owner: string;
+  }
+
   const ProjectsPage = () => {
-    const [projects, setProjects] = useState([]);
+    const [projects, setProjects] = useState<Project[]>([]);
 
     const fetchProjects = async () => {
       const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
       try {
         const users = ['zvielkoren', 'zvicraft'];
-        const fetchedProjects: Array<{
-          name: string;
-          description: string;
-          githubLink: string;
-          owner: string;
-        }> = [];
+        const fetchedProjects: Project[] = [];
 
         for (const username of users) {
           const response = await octokit.repos.listForUser({
@@ -36,7 +38,7 @@
           fetchedProjects.push(...userProjects);
         }
 
-        
+        setProjects(fetchedProjects);
       } catch (error) {
         console.error('Error fetching projects:', error);
       }
