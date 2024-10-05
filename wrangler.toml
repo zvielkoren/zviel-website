@@ -2,9 +2,4 @@ main = ".worker-next/index.mjs"
 name = "zviel-website"  # Fix typo here
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
-
-# Try removing or replacing experimental_assets with assets
-assets = { directory = ".worker-next/assets", binding = "ASSETS" }  # Updated field
-routes = [
-  { pattern = "zvielkoren.com/*", custom_domain = true }
-]
+pages_build_output_dir = ".vercel/output/static"
