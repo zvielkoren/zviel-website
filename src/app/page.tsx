@@ -27,7 +27,7 @@ export default function Home() {
         </p>
         <div className="flex space-x-4">
                   <Link href="/projects">
-                    <Button color="primary" variant="solid" size="lg" className="font-bold hover:bg-[#45505b] transition-colors duration-300 px-6 py-3 rounded-full shadow-lg">
+                    <Button color="primary" variant="solid" size="lg" className="font-bold bg-[#2c3e50] hover:bg-[#34495e] transition-colors duration-300 px-8 py-4 rounded-full shadow-lg text-lg">
                       👨‍💻 View Projects
                     </Button>
                   </Link>
@@ -65,7 +65,7 @@ export default function Home() {
         <h2 className="text-2xl font-bold mb-4">Get in Touch</h2>
         <p className="mb-4">I'm always open to new opportunities and collaborations.</p>
 
-        <Button color="primary" variant="solid" size="lg" className="font-bold hover:bg-[#45505b] transition-colors duration-300 px-6 py-3 rounded-full shadow-lg" as="a" href="/contact"> ✉️ Email Me</Button>
+        <Button color="primary" variant="solid" size="lg" className="font-bold bg-[#2c3e50] hover:bg-[#34495e] transition-colors duration-300 px-8 py-4 rounded-full shadow-lg text-lg" as="a" href="/contact"> ✉️ Email Me</Button>
       </section>
       <footer className="mt-16 text-center">
         <p>© 2021 - {new Date().getFullYear()} Zviel Koren. All rights reserved.</p>
