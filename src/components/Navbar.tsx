@@ -29,9 +29,8 @@ const Navbar: React.FC = () => {
   return (
     <NavbarContainer>
       <Link href="/">
-        <StyledAnchor>Zviel Koren</StyledAnchor>
-      </Link>
-      <NavLinks>
+        <img src="/profile-picture.png" alt="Zviel Koren" style={{ height: '100px', width: '100px', borderRadius: '50%' }} />
+      </Link>      <NavLinks>
         <Link href="/">
           <StyledAnchor>Home</StyledAnchor>
         </Link>
@@ -39,6 +38,7 @@ const Navbar: React.FC = () => {
         <Link href="/contact">
           <StyledAnchor>Contact</StyledAnchor>
         </Link>
+        
       </NavLinks>
     </NavbarContainer>
   );

@@ -11,7 +11,7 @@ const ContactPage: React.FC = () => {
           gutterBottom 
           sx={{ 
             fontWeight: 'bold', 
-            color: '#2e7d32'  // Green color for heading
+            color: '#589'  // Green color for heading
           }}
         >
           Contact Us
@@ -19,7 +19,7 @@ const ContactPage: React.FC = () => {
         <Typography 
           variant="body1" 
           paragraph 
-          sx={{ color: '#555' }} // Slightly muted color for the body text
+          sx={{ color: '#556' }} // Slightly muted color for the body text
         >
           We'd love to hear from you! Please fill out the form below and we'll get back to you as soon as possible.
         </Typography>
