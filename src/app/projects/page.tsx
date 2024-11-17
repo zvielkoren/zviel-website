@@ -17,13 +17,16 @@ const ProjectsPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   
   const fetchProjects = async () => {
-    const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+      const octokit = new Octokit({ 
+        auth: process.env.GITHUB_TOKEN 
+      });
     try {
       const userIds = ['132788625', '181019388'];
       const fetchedProjects: Project[] = [];
 
       for (const id of userIds) {
-        const response = await octokit.rest.repos.listForAuthenticatedUser({
+        const response = await octokit.rest.repos.listForUser({
+          username: id,
           sort: 'updated',
           direction: 'desc',
           per_page: 1000,
@@ -46,7 +49,9 @@ const ProjectsPage = () => {
     }
   };
 
-  useEffect(() => {    const interval = setInterval(fetchProjects, Number(process.env.TimeOuteFetch) || 60000);
+  useEffect(() => {
+    fetchProjects();
+    const interval = setInterval(fetchProjects, Number(process.env.TimeOuteFetch) || 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -71,6 +76,4 @@ const ProjectsPage = () => {
 
 export default ProjectsPage;
 
-function fetchProjects(): void {
-  throw new Error('Function not implemented.');
-}
+
