@@ -17,7 +17,7 @@
     const fetchProjects = async () => {
       const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
       try {
-        const users = ['zvielkoren', 'zvicraft'];
+        const users = ['132788625', '181019388'];
         const fetchedProjects: Project[] = [];
 
         for (const username of users) {
