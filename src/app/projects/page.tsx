@@ -17,38 +17,50 @@ const ProjectsPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   
   const fetchProjects = async () => {
-      const octokit = new Octokit({ 
-        auth: process.env.GITHUB_TOKEN 
-      });
-    try {
-      const userIds = ['132788625', '181019388'];
-      const fetchedProjects: Project[] = [];
-
-      for (const id of userIds) {
-        const response = await octokit.rest.repos.listForUser({
-          username: id,
-          sort: 'updated',
-          direction: 'desc',
-          per_page: 1000,
-        });
-
-        const userProjects = response.data.map(repo => ({
-          id: repo.id.toString(),
-          name: repo.name,
-          description: repo.description || '',
-          githubLink: repo.html_url,
-          owner: id,
-        }));
-
-        fetchedProjects.push(...userProjects);
-      }
-
-      setProjects(fetchedProjects);
-    } catch (error) {
-      console.error('Error fetching projects:', error);
+  const octokit = new Octokit({ 
+    auth: process.env.GITHUB_TOKEN,
+    throttle: {
+      onRateLimit: (retryAfter: number, options: { request: { retryCount: number } }) => {
+        if (options.request.retryCount === 0) {
+          console.log(`Rate limit hit, retrying after ${retryAfter} seconds`);
+          return true;
+        }
+      },      onSecondaryRateLimit: (_retryAfter: any, options: { request: { retryCount: number; }; }) => {
+        if (options.request.retryCount === 0) {
+          return true;
+        }
+      },
     }
-  };
+  });
 
+  try {
+    const userIds = ['132788625', '181019388'];
+    const fetchedProjects: Project[] = [];
+
+    for (const id of userIds) {
+      const response = await octokit.rest.repos.listForUser({
+        username: id,
+        sort: 'updated',
+        direction: 'desc',
+        per_page: 100, // Reduced from 1000 to stay within limits
+      });
+
+      const userProjects = response.data.map(repo => ({
+        id: repo.id.toString(),
+        name: repo.name,
+        description: repo.description || '',
+        githubLink: repo.html_url,
+        owner: id,
+      }));
+
+      fetchedProjects.push(...userProjects);
+    }
+
+    setProjects(fetchedProjects);
+  } catch (error) {
+    console.error('Error fetching projects:', error);
+  }
+};
   useEffect(() => {
     fetchProjects();
     const interval = setInterval(fetchProjects, Number(process.env.TimeOuteFetch) || 60000);
