@@ -62,11 +62,11 @@ const VersionsPage = () => {
     filters?: object;
   }>({ message: '' });
 
-  const fetchVersions = async (event: React.MouseEvent<HTMLButtonElement>, filters?: { 
-    website?: string, 
-    version?: string, 
-    platform?: string 
-  }) => {
+  const fetchVersions = async (filters?: {
+    website?: string;
+    version?: string;
+    platform?: string;
+  } | null) => {
     try {
       setError('');
       setErrorDetails({ message: '' });
@@ -97,7 +97,7 @@ const VersionsPage = () => {
       setError(err.message || 'An unexpected error occurred');
       setErrorDetails({
         message: err.message,
-        filters: filters
+        filters: filters || undefined
       });
     } finally {
       setLoading(false);
@@ -112,7 +112,7 @@ const VersionsPage = () => {
     setSelectedVersion(version);
   };
 
-  const closeVersionModal = () => {
+  const closeVersionModal = (event?: React.MouseEvent<HTMLButtonElement, MouseEvent> | undefined) => {
     setSelectedVersion(null);
   };
 
@@ -160,25 +160,25 @@ const VersionsPage = () => {
 
       <div className="mb-4 flex space-x-2 justify-center">
         <button 
-          onClick={(event) => fetchVersions(event, { website: testFilters.website })}
+          onClick={(event) => fetchVersions({ website: testFilters.website })}
           className="bg-blue-500 text-white px-4 py-2 rounded"
         >
           Test Website Filter
         </button>
         <button 
-          onClick={(event) => fetchVersions(event, { version: testFilters.version })}
+          onClick={(event) => fetchVersions({ version: testFilters.version })}
           className="bg-green-500 text-white px-4 py-2 rounded"
         >
           Test Version Filter
         </button>
         <button 
-          onClick={(event) => fetchVersions(event, { platform: testFilters.platform })}
+          onClick={(event) => fetchVersions({ platform: testFilters.platform })}
           className="bg-purple-500 text-white px-4 py-2 rounded"
         >
           Test Platform Filter
         </button>
         <button 
-          onClick={(event) => fetchVersions(event)}
+          onClick={(event) => fetchVersions()}
           className="bg-gray-500 text-white px-4 py-2 rounded"
         >
           Fetch All Versions
