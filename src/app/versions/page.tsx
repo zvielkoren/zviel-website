@@ -228,18 +228,18 @@ const VersionsPage = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
-            onClick={closeVersionModal}
+            onClick={(e: React.MouseEvent<HTMLDivElement, MouseEvent>) => closeVersionModal()}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e: React.MouseEvent<HTMLDivElement, MouseEvent>) => e.stopPropagation()}
               className="bg-white rounded-lg p-8 max-w-4xl w-full relative max-h-[90vh] overflow-y-auto grid md:grid-cols-2 gap-6"
             >
               <div>
                 <button 
-                  onClick={closeVersionModal} 
+                  onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => closeVersionModal()} 
                   className="absolute top-4 right-4 text-gray-600 hover:text-gray-900"
                 >
                   <FaTag size={24} />
