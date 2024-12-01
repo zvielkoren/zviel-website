@@ -1,0 +1,13 @@
+{
+  "version": "0.1.0",
+  "commitCount": 42,
+  "lastCommitHash": "dev-local-hash",
+  "generatedAt": "2024-02-15T12:00:00Z",
+  "changeLog": [
+    {
+      "hash": "abc123",
+      "message": "feat: add version tracking",
+      "author": "Zviel Koren"
+    }
+  ]
+}

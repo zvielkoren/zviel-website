@@ -21,6 +21,9 @@ jobs:
     
     - name: Generate Version File
       run: |
+        # Ensure .versions directory exists
+        mkdir -p $GITHUB_WORKSPACE/.versions
+        
         # Get the latest tag or start from 0.0.0
         LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
         
@@ -50,15 +53,28 @@ jobs:
           NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
         fi
         
-        # Create version file
-        mkdir -p .versions
-        echo "{
-          \"version\": \"$NEW_VERSION\",
-          \"commitCount\": $COMMIT_COUNT,
-          \"lastCommitHash\": \"$(git rev-parse HEAD)\",
-          \"generatedAt\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\",
-          \"changeLog\": $(git log $LATEST_TAG..HEAD --pretty=format:'{"hash":"%h","message":"%s","author":"%an"}' | jq -s .)
-        }" > .versions/current.json
+        # Create version file with changelog
+        CHANGELOG=$(git log $LATEST_TAG..HEAD --pretty=format:'{"hash":"%h","message":"%s","author":"%an"}' | jq -s .)
+        
+        cat > $GITHUB_WORKSPACE/.versions/current.json << EOF
+        {
+          "version": "$NEW_VERSION",
+          "commitCount": $COMMIT_COUNT,
+          "lastCommitHash": "$(git rev-parse HEAD)",
+          "generatedAt": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+          "changeLog": $CHANGELOG
+        }
+        EOF
+        
+        # Display the generated file for debugging
+        cat $GITHUB_WORKSPACE/.versions/current.json
+    
+    - name: Upload Version Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: version-info
+        path: .versions/current.json
+        retention-days: 1
     
     - name: Commit Version File
       run: |

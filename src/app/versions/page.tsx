@@ -1,17 +1,51 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { FaRocket, FaCalendar, FaTag } from 'react-icons/fa';
+import Image from 'next/image';
+import { FaCalendar, FaTag, FaCloud, FaCode, FaBug, FaGraduationCap, FaGit } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 
-interface WebsiteVersion {
-  id: number;
-  version: string;
-  date: string;
+interface VersionNative {
+  title: string;
   description: string;
-  changes: string[];
-  deploymentLink?: string;
+  technicalDetails: string[];
+  challenges: string[];
+  learnings: string[];
+  imageUrl?: string;
 }
+
+interface WebsiteVersion {
+  version: string;
+  deploymentDate: string;
+  commitHash: string;
+  changelog: Array<{
+    type: 'feat' | 'fix' | 'docs' | 'chore';
+    description: string;
+    date: string;
+  }>;
+  deploymentPlatform: 'Cloudflare Workers';
+  links: {
+    website: string;
+    repository?: string;
+  };
+  native?: VersionNative;
+  originalCommits?: {
+    hash: string;
+    message: string;
+    date: string;
+    author: string;
+  }[];
+}
+
+const DEFAULT_VERSION: WebsiteVersion = {
+  version: '0.0.1',
+  deploymentDate: new Date().toISOString(),
+  commitHash: 'unknown',
+  changelog: [],
+  deploymentPlatform: 'Cloudflare Workers',
+  links: {
+    website: 'https://zvielkoren.com'
+  }
+};
 
 const VersionsPage = () => {
   const [versions, setVersions] = useState<WebsiteVersion[]>([]);
@@ -19,25 +53,44 @@ const VersionsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedVersion, setSelectedVersion] = useState<WebsiteVersion | null>(null);
 
-  const fetchVersions = async () => {
+  const fetchVersions = async (filters?: { 
+    website?: string, 
+    version?: string, 
+    platform?: string 
+  }) => {
     try {
       setLoading(true);
-      const response = await fetch('/api/versions', { 
-        cache: 'no-store',  // Disable caching
-        next: { revalidate: 0 }  // Force dynamic rendering
+      
+      // Construct query parameters
+      const queryParams = new URLSearchParams();
+      if (filters?.website) queryParams.set('website', filters.website);
+      if (filters?.version) queryParams.set('version', filters.version);
+      if (filters?.platform) queryParams.set('platform', filters.platform);
+      
+      const url = `/api/versions${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      
+      const response = await fetch(url, { 
+        cache: 'no-store',
+        next: { revalidate: 0 }
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.details?.message || 'Failed to fetch versions');
+        throw new Error('Failed to fetch versions');
       }
       
       const data = await response.json();
-      setVersions(data);
+      
+      // Sort versions in descending order
+      const sortedVersions = data.sort((a: WebsiteVersion, b: WebsiteVersion) => 
+        new Date(b.deploymentDate).getTime() - new Date(a.deploymentDate).getTime()
+      );
+      
+      setVersions(sortedVersions);
       setError(null);
     } catch (error) {
       console.error('Error fetching versions:', error);
-      setError(error instanceof Error ? error.message : 'Unknown error occurred');
+      setError(error instanceof Error ? error.message : 'Unknown error');
+      setVersions([DEFAULT_VERSION]);
     } finally {
       setLoading(false);
     }
@@ -63,23 +116,6 @@ const VersionsPage = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-red-500 text-center">
-          <h2 className="text-xl font-bold mb-2">Error</h2>
-          <p>{error}</p>
-          <button 
-            onClick={fetchVersions} 
-            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="container mx-auto px-4 py-8">
       <motion.h1 
@@ -87,48 +123,64 @@ const VersionsPage = () => {
         animate={{ opacity: 1, y: 0 }}
         className="text-4xl font-bold mb-8 text-cyan-200 text-center"
       >
-        Website Versions
+        Website Version History
       </motion.h1>
-      {versions.length === 0 ? (
-        <div className="text-center text-gray-500">
-          No versions found
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {versions.map((version, index) => (
-            <motion.div
-              key={version.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              onClick={() => openVersionModal(version)}
-              className="bg-gradient-to-br from-[#6e89a8] to-[#7a97b8] shadow-lg rounded-lg p-6 hover:shadow-xl transition-shadow duration-300 cursor-pointer"
-            >
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-gray-800">{version.version}</h2>
-                <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                  {version.version}
-                </span>
-              </div>
-              <div className="flex items-center text-gray-600 mb-2">
-                <FaCalendar className="mr-2" />
-                <span>{new Date(version.date).toLocaleDateString()}</span>
-              </div>
-              <p className="text-gray-700 line-clamp-3">
-                {version.description}
-              </p>
-            </motion.div>
-          ))}
+      
+      {error && (
+        <div className="text-red-500 text-center mb-4">
+          <p>{error}</p>
+          <button 
+            onClick={fetchVersions} 
+            className="mt-2 bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            Retry
+          </button>
         </div>
       )}
 
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {versions.map((version, index) => (
+          <motion.div
+            key={version.commitHash}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            onClick={() => openVersionModal(version)}
+            className="bg-gradient-to-br from-[#6e89a8] to-[#7a97b8] shadow-lg rounded-lg p-6 hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-gray-800">
+                {version.version}
+              </h2>
+              <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded flex items-center">
+                <FaCloud className="mr-2" /> {version.deploymentPlatform}
+              </span>
+            </div>
+            <div className="flex items-center text-gray-600 mb-2">
+              <FaCalendar className="mr-2" />
+              <span>
+                {new Date(version.deploymentDate).toLocaleDateString()}
+              </span>
+            </div>
+            <p className="text-gray-700 line-clamp-3">
+              Commit: {version.commitHash.substring(0, 7)}
+            </p>
+            {version.native && (
+              <div className="mt-4 text-sm text-gray-700">
+                <strong>{version.native.title}</strong>
+              </div>
+            )}
+          </motion.div>
+        ))}
+      </div>
+
       <AnimatePresence>
-        {selectedVersion && (
+        {selectedVersion && selectedVersion.native && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
+            className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
             onClick={closeVersionModal}
           >
             <motion.div
@@ -136,45 +188,131 @@ const VersionsPage = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-lg p-8 max-w-2xl w-full relative max-h-[80vh] overflow-y-auto"
+              className="bg-white rounded-lg p-8 max-w-4xl w-full relative max-h-[90vh] overflow-y-auto grid md:grid-cols-2 gap-6"
             >
-              <button 
-                onClick={closeVersionModal} 
-                className="absolute top-4 right-4 text-gray-600 hover:text-gray-900"
-              >
-                <FaTag size={24} />
-              </button>
-              <h2 className="text-2xl font-bold mb-4">Version {selectedVersion.version}</h2>
-              <div className="space-y-4">
-                <div>
-                  <strong>Description:</strong>
-                  <p>{selectedVersion.description}</p>
+              <div>
+                <button 
+                  onClick={closeVersionModal} 
+                  className="absolute top-4 right-4 text-gray-600 hover:text-gray-900"
+                >
+                  <FaTag size={24} />
+                </button>
+                <h2 className="text-2xl font-bold mb-4 flex items-center">
+                  Version {selectedVersion.version}
+                  <span className="ml-2 text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                    <FaCloud className="inline mr-2" /> 
+                    {selectedVersion.deploymentPlatform}
+                  </span>
+                </h2>
+                
+                {selectedVersion.native?.imageUrl && (
+                  <div className="mb-6 rounded-lg overflow-hidden shadow-lg">
+                    <Image 
+                      src={selectedVersion.native.imageUrl} 
+                      alt={`Version ${selectedVersion.version} Screenshot`}
+                      width={600}
+                      height={400}
+                      className="w-full object-cover"
+                    />
+                  </div>
+                )}
+                
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-bold flex items-center mb-2">
+                      <FaTag className="mr-2" /> Description
+                    </h3>
+                    <p>{selectedVersion.native.description}</p>
+                  </div>
                 </div>
+              </div>
+              
+              <div className="space-y-6">
                 <div>
-                  <strong>Release Date:</strong>
-                  <p>{new Date(selectedVersion.date).toLocaleString()}</p>
-                </div>
-                <div>
-                  <strong>Key Changes:</strong>
-                  <ul className="list-disc list-inside space-y-2">
-                    {selectedVersion.changes.map((change, index) => (
-                      <li key={index}>{change}</li>
+                  <h3 className="font-bold flex items-center mb-2">
+                    <FaCode className="mr-2" /> Technical Details
+                  </h3>
+                  <ul className="list-disc list-inside space-y-1 text-gray-700">
+                    {selectedVersion.native.technicalDetails.map((detail, index) => (
+                      <li key={index}>{detail}</li>
                     ))}
                   </ul>
                 </div>
-                {selectedVersion.deploymentLink && (
+                
+                <div>
+                  <h3 className="font-bold flex items-center mb-2">
+                    <FaBug className="mr-2" /> Challenges
+                  </h3>
+                  <ul className="list-disc list-inside space-y-1 text-gray-700">
+                    {selectedVersion.native.challenges.map((challenge, index) => (
+                      <li key={index}>{challenge}</li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div>
+                  <h3 className="font-bold flex items-center mb-2">
+                    <FaGraduationCap className="mr-2" /> Learnings
+                  </h3>
+                  <ul className="list-disc list-inside space-y-1 text-gray-700">
+                    {selectedVersion.native.learnings.map((learning, index) => (
+                      <li key={index}>{learning}</li>
+                    ))}
+                  </ul>
+                </div>
+                
+                {selectedVersion.originalCommits && (
                   <div>
-                    <Link 
-                      href={selectedVersion.deploymentLink} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline flex items-center"
-                    >
-                      <FaRocket className="mr-2" />
-                      View Deployed Version
-                    </Link>
+                    <h3 className="font-bold flex items-center mb-2">
+                      <FaGit className="mr-2" /> Original Commits
+                    </h3>
+                    <ul className="space-y-2">
+                      {selectedVersion.originalCommits.map((commit, index) => (
+                        <li 
+                          key={commit.hash} 
+                          className="bg-gray-100 p-2 rounded"
+                        >
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="font-mono text-sm text-gray-600">
+                              {commit.hash.substring(0, 7)}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {new Date(commit.date).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-sm">{commit.message}</p>
+                          <div className="text-xs text-gray-500 mt-1">
+                            By {commit.author}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 )}
+                
+                <div className="mt-4">
+                  <h3 className="font-bold mb-2">Links</h3>
+                  <div className="flex space-x-4">
+                    <a 
+                      href={selectedVersion.links.website} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      Website
+                    </a>
+                    {selectedVersion.links.repository && (
+                      <a 
+                        href={selectedVersion.links.repository} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        Repository
+                      </a>
+                    )}
+                  </div>
+                </div>
               </div>
             </motion.div>
           </motion.div>
