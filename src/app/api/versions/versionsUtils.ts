@@ -92,9 +92,13 @@ export async function fetchVersionsFromCloudflareWorkers(clientVersionData?: Par
               ...version,
               deploymentPlatform: 'Cloudflare Workers/Pages',
               links: {
-                website: 'https://zvielkoren.com',
-                repository: 'https://github.com/zvielkoren/zviel-website',
-                ...version.links
+                website: version.links?.website || 'https://zvielkoren.com',
+                repository: version.links?.repository || 'https://github.com/zvielkoren/zviel-website',
+                ...(version.links && Object.fromEntries(
+                  Object.entries(version.links).filter(([key]) => 
+                    !['website', 'repository'].includes(key)
+                  )
+                ))
               }
             });
           }
