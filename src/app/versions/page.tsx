@@ -69,7 +69,7 @@ const VersionsPage = () => {
   }) => {
     try {
       setError('');
-      setErrorDetails({});
+      setErrorDetails({ message: '' });
       setLoading(true);
 
       const queryParams = new URLSearchParams();
