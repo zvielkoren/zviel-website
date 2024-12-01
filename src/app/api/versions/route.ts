@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchVersionsFromCloudflareWorkers } from './versionsUtils';
 
+// Add Edge Runtime configuration
+export const runtime = 'edge';
+
 // Define WebsiteVersion interface
 export interface WebsiteVersion {
   version: string;

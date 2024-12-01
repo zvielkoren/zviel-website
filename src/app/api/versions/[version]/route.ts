@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchVersionsFromCloudflareWorkers } from '../versionsUtils';
 
+// Add Edge Runtime configuration
+export const runtime = 'edge';
+
 export async function GET(
   request: NextRequest, 
   { params }: { params: { version: string } }
