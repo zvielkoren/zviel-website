@@ -35,6 +35,14 @@ const Navbar: React.FC = () => {
           <StyledAnchor>Home</StyledAnchor>
         </Link>
        
+        <Link href="/projects">
+          <StyledAnchor>Projects</StyledAnchor>
+        </Link>
+
+        <Link href="/versions">
+          <StyledAnchor>Versions</StyledAnchor>
+        </Link>
+        
         <Link href="/contact">
           <StyledAnchor>Contact</StyledAnchor>
         </Link>

@@ -6,12 +6,13 @@
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "module": "esnext",
+    "module": "es2022",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "target": "es2017",
     "plugins": [
       {
         "name": "next"
@@ -21,6 +22,13 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/components/Navbar.tsx"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
