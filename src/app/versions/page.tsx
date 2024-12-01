@@ -62,67 +62,50 @@ const VersionsPage = () => {
     filters?: object;
   }>({ message: '' });
 
-  const fetchVersions = async (filters?: { 
+  const fetchVersions = async (event: React.MouseEvent<HTMLButtonElement>, filters?: { 
     website?: string, 
     version?: string, 
     platform?: string 
   }) => {
     try {
-      console.log('Fetching versions with filters:', filters);
+      setError('');
+      setErrorDetails({});
       setLoading(true);
-      
-      // Construct query parameters
+
       const queryParams = new URLSearchParams();
       if (filters?.website) queryParams.set('website', filters.website);
       if (filters?.version) queryParams.set('version', filters.version);
       if (filters?.platform) queryParams.set('platform', filters.platform);
-      
-      const url = `/api/versions${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-      
-      const response = await fetch(url, { 
-        cache: 'no-store',
-        next: { revalidate: 0 }
+
+      const response = await fetch(`/api/versions?${queryParams.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-store'
       });
-      
+
       if (!response.ok) {
-        // Capture detailed error information
-        const errorText = await response.text();
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch versions');
       }
-      
-      const data = await response.json();
-      
-      // Log the number of versions returned
-      console.log(`Fetched ${data.length} versions with filters:`, filters);
-      
-      // Sort versions in descending order
-      const sortedVersions = data.sort((a: WebsiteVersion, b: WebsiteVersion) => 
-        new Date(b.deploymentDate).getTime() - new Date(a.deploymentDate).getTime()
-      );
-      
-      setVersions(sortedVersions);
-      setError(null);
-      
-      // Clear any previous error details
-      setErrorDetails({ message: '' });
-    } catch (error) {
-      console.error('Error fetching versions:', error);
-      
-      // Capture and display detailed error information
+
+      const data: WebsiteVersion[] = await response.json();
+      setVersions(data);
+    } catch (err: any) {
+      console.error('Fetch versions error:', err);
+      setError(err.message || 'An unexpected error occurred');
       setErrorDetails({
-        message: error instanceof Error ? error.message : 'Unknown error',
-        filters
+        message: err.message,
+        filters: filters
       });
-      
-      setError(errorDetails.message);
-      setVersions([DEFAULT_VERSION]);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchVersions();
+    fetchVersions(null);
   }, []);
 
   const openVersionModal = (version: WebsiteVersion) => {
@@ -155,7 +138,7 @@ const VersionsPage = () => {
         <div className="text-red-500 text-center mb-4">
           <p>{error}</p>
           <button 
-            onClick={fetchVersions} 
+            onClick={(event) => fetchVersions(event)} 
             className="mt-2 bg-blue-500 text-white px-4 py-2 rounded"
           >
             Retry
@@ -177,25 +160,25 @@ const VersionsPage = () => {
 
       <div className="mb-4 flex space-x-2 justify-center">
         <button 
-          onClick={() => fetchVersions({ website: testFilters.website })}
+          onClick={(event) => fetchVersions(event, { website: testFilters.website })}
           className="bg-blue-500 text-white px-4 py-2 rounded"
         >
           Test Website Filter
         </button>
         <button 
-          onClick={() => fetchVersions({ version: testFilters.version })}
+          onClick={(event) => fetchVersions(event, { version: testFilters.version })}
           className="bg-green-500 text-white px-4 py-2 rounded"
         >
           Test Version Filter
         </button>
         <button 
-          onClick={() => fetchVersions({ platform: testFilters.platform })}
+          onClick={(event) => fetchVersions(event, { platform: testFilters.platform })}
           className="bg-purple-500 text-white px-4 py-2 rounded"
         >
           Test Platform Filter
         </button>
         <button 
-          onClick={() => fetchVersions()}
+          onClick={(event) => fetchVersions(event)}
           className="bg-gray-500 text-white px-4 py-2 rounded"
         >
           Fetch All Versions
