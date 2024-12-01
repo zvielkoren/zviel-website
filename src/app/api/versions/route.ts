@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
       ? {
           ...(websiteFilter && { links: { website: websiteFilter } }),
           ...(versionFilter && { version: versionFilter }),
-          ...(platformFilter && { deploymentPlatform: platformFilter as 'Cloudflare Workers' })
+          ...(platformFilter && { deploymentPlatform: platformFilter as 'Cloudflare Workers' | 'Cloudflare Workers/Pages' })
         } 
       : undefined;
 

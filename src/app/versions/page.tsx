@@ -158,32 +158,7 @@ const VersionsPage = () => {
         </div>
       )}
 
-      <div className="mb-4 flex space-x-2 justify-center">
-        <button 
-          onClick={() => fetchVersions({ website: testFilters.website })}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          Test Website Filter
-        </button>
-        <button 
-          onClick={() => fetchVersions({ version: testFilters.version })}
-          className="bg-green-500 text-white px-4 py-2 rounded"
-        >
-          Test Version Filter
-        </button>
-        <button 
-          onClick={() => fetchVersions({ platform: testFilters.platform })}
-          className="bg-purple-500 text-white px-4 py-2 rounded"
-        >
-          Test Platform Filter
-        </button>
-        <button 
-          onClick={() => fetchVersions()}
-          className="bg-gray-500 text-white px-4 py-2 rounded"
-        >
-          Fetch All Versions
-        </button>
-      </div>
+     
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {versions.map((version, index) => (
@@ -291,9 +266,13 @@ const VersionsPage = () => {
                     <FaBug className="mr-2" /> Challenges
                   </h3>
                   <ul className="list-disc list-inside space-y-1 text-gray-700">
-                    {selectedVersion.native.challenges.map((challenge, index) => (
-                      <li key={index}>{challenge}</li>
-                    ))}
+                    {selectedVersion.native?.challenges?.length ? (
+                      selectedVersion.native.challenges.map((challenge, index) => (
+                        <li key={index}>{challenge}</li>
+                      ))
+                    ) : (
+                      <li className="text-gray-500 italic">No specific challenges documented</li>
+                    )}
                   </ul>
                 </div>
                 
@@ -302,9 +281,13 @@ const VersionsPage = () => {
                     <FaGraduationCap className="mr-2" /> Learnings
                   </h3>
                   <ul className="list-disc list-inside space-y-1 text-gray-700">
-                    {selectedVersion.native.learnings.map((learning, index) => (
-                      <li key={index}>{learning}</li>
-                    ))}
+                    {selectedVersion.native?.learnings?.length ? (
+                      selectedVersion.native.learnings.map((learning, index) => (
+                        <li key={index}>{learning}</li>
+                      ))
+                    ) : (
+                      <li className="text-gray-500 italic">No specific learnings documented</li>
+                    )}
                   </ul>
                 </div>
                 
