@@ -87,6 +87,15 @@ export async function GET(
   { params }: { params: { version: string } }
 ) {
   try {
+    // Construct a new URL with the version filter
+    const url = new URL(`https://example.com/versions?version=${params.version}`);
+    
+    // Create a mock request with the filtered URL
+    const filteredRequest = new NextRequest(url);
+    
+    // Import the fetchVersionsFromCloudflareWorkers function from the parent route
+    const { fetchVersionsFromCloudflareWorkers } = await import('../route');
+    
     const versions = await fetchVersionsFromCloudflareWorkers({ version: params.version });
     const foundVersion = versions[0];
     
