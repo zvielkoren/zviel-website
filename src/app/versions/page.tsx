@@ -52,6 +52,15 @@ const VersionsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedVersion, setSelectedVersion] = useState<WebsiteVersion | null>(null);
+  const [testFilters, setTestFilters] = useState({
+    website: 'https://zvielkoren.com',
+    version: '1.0.0',
+    platform: 'Cloudflare Workers'
+  });
+  const [errorDetails, setErrorDetails] = useState<{
+    message: string;
+    filters?: object;
+  }>({ message: '' });
 
   const fetchVersions = async (filters?: { 
     website?: string, 
@@ -59,6 +68,7 @@ const VersionsPage = () => {
     platform?: string 
   }) => {
     try {
+      console.log('Fetching versions with filters:', filters);
       setLoading(true);
       
       // Construct query parameters
@@ -75,10 +85,15 @@ const VersionsPage = () => {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to fetch versions');
+        // Capture detailed error information
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
       
       const data = await response.json();
+      
+      // Log the number of versions returned
+      console.log(`Fetched ${data.length} versions with filters:`, filters);
       
       // Sort versions in descending order
       const sortedVersions = data.sort((a: WebsiteVersion, b: WebsiteVersion) => 
@@ -87,9 +102,19 @@ const VersionsPage = () => {
       
       setVersions(sortedVersions);
       setError(null);
+      
+      // Clear any previous error details
+      setErrorDetails({ message: '' });
     } catch (error) {
       console.error('Error fetching versions:', error);
-      setError(error instanceof Error ? error.message : 'Unknown error');
+      
+      // Capture and display detailed error information
+      setErrorDetails({
+        message: error instanceof Error ? error.message : 'Unknown error',
+        filters
+      });
+      
+      setError(errorDetails.message);
       setVersions([DEFAULT_VERSION]);
     } finally {
       setLoading(false);
@@ -137,6 +162,45 @@ const VersionsPage = () => {
           </button>
         </div>
       )}
+
+      {errorDetails.message && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+          <strong className="font-bold">Error: </strong>
+          <span className="block sm:inline">{errorDetails.message}</span>
+          {errorDetails.filters && (
+            <pre className="mt-2 text-sm">
+              Filters: {JSON.stringify(errorDetails.filters, null, 2)}
+            </pre>
+          )}
+        </div>
+      )}
+
+      <div className="mb-4 flex space-x-2 justify-center">
+        <button 
+          onClick={() => fetchVersions({ website: testFilters.website })}
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+        >
+          Test Website Filter
+        </button>
+        <button 
+          onClick={() => fetchVersions({ version: testFilters.version })}
+          className="bg-green-500 text-white px-4 py-2 rounded"
+        >
+          Test Version Filter
+        </button>
+        <button 
+          onClick={() => fetchVersions({ platform: testFilters.platform })}
+          className="bg-purple-500 text-white px-4 py-2 rounded"
+        >
+          Test Platform Filter
+        </button>
+        <button 
+          onClick={() => fetchVersions()}
+          className="bg-gray-500 text-white px-4 py-2 rounded"
+        >
+          Fetch All Versions
+        </button>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {versions.map((version, index) => (

@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 interface VersionNative {
   title: string;
@@ -39,7 +39,7 @@ interface WebsiteVersion {
 }
 
 // Fetch versions from Cloudflare Workers KV or Worker
-async function fetchVersionsFromCloudflareWorkers(clientVersionData?: Partial<WebsiteVersion>): Promise<WebsiteVersion[]> {
+export async function fetchVersionsFromCloudflareWorkers(clientVersionData?: Partial<WebsiteVersion>): Promise<WebsiteVersion[]> {
   // Cloudflare Workers and Pages endpoints for version retrieval
   const CLOUDFLARE_VERSIONS_WORKERS_API = 'https://versions.zvielkoren.workers.dev/versions';
   const CLOUDFLARE_VERSIONS_PAGES_API = 'https://versions.zviel-websit.pages.dev/versions';
@@ -158,11 +158,37 @@ async function fetchVersionsFromCloudflareWorkers(clientVersionData?: Partial<We
   }
 }
 
-export async function GET(clientVersionData?: Partial<WebsiteVersion>) {
+export async function GET(request: NextRequest) {
+  // Log incoming request and query parameters
+  console.log('Incoming version request URL:', request.url);
+  
+  const { searchParams } = new URL(request.url);
+  const websiteFilter = searchParams.get('website');
+  const versionFilter = searchParams.get('version');
+  const platformFilter = searchParams.get('platform');
+
+  console.log('Filters:', { 
+    website: websiteFilter, 
+    version: versionFilter,
+    platform: platformFilter 
+  });
+
   try {
-    // Fetch versions from Cloudflare Workers
+    // Create client version data object based on query parameters
+    const clientVersionData: Partial<WebsiteVersion> | undefined = websiteFilter || versionFilter || platformFilter 
+      ? {
+          ...(websiteFilter && { links: { website: websiteFilter } }),
+          ...(versionFilter && { version: versionFilter }),
+          ...(platformFilter && { deploymentPlatform: platformFilter as 'Cloudflare Workers' })
+        } 
+      : undefined;
+
+    // Fetch versions with optional filtering
     const versions = await fetchVersionsFromCloudflareWorkers(clientVersionData);
     
+    // Log the number of versions returned
+    console.log(`Returned ${versions.length} versions`);
+
     // Sort versions in descending order
     const sortedVersions = versions.sort((a, b) => 
       new Date(b.deploymentDate).getTime() - new Date(a.deploymentDate).getTime()
@@ -170,29 +196,36 @@ export async function GET(clientVersionData?: Partial<WebsiteVersion>) {
 
     return NextResponse.json(sortedVersions);
   } catch (error) {
+    // Log detailed error information
     console.error('Version Fetch Error:', error);
+    
     return NextResponse.json({ 
       error: 'Failed to fetch website versions', 
       details: error instanceof Error ? {
         message: error.message,
-        name: error.name
+        name: error.name,
+        filters: { 
+          website: websiteFilter, 
+          version: versionFilter,
+          platform: platformFilter 
+        }
       } : 'Unknown error'
     }, { status: 500 });
   }
 }
 
-// Route to get specific version by version number
-export async function GET_VERSION(version: string, clientVersionData?: Partial<WebsiteVersion>) {
+// Specific version route
+export async function GET_VERSION(request: NextRequest, { params }: { params: { version: string } }) {
   try {
-    const versions = await fetchVersionsFromCloudflareWorkers(clientVersionData);
-    const foundVersion = versions.find(v => v.version === version);
+    const versions = await fetchVersionsFromCloudflareWorkers({ version: params.version });
+    const foundVersion = versions[0];
     
     if (foundVersion) {
       return NextResponse.json(foundVersion);
     }
     
     return NextResponse.json({ 
-      error: `Version ${version} not found` 
+      error: `Version ${params.version} not found` 
     }, { status: 404 });
   } catch (error) {
     console.error('Specific Version Fetch Error:', error);
