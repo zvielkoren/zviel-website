@@ -112,7 +112,7 @@ const VersionsPage = () => {
     setSelectedVersion(version);
   };
 
-  const closeVersionModal = (event?: React.MouseEvent<HTMLButtonElement, MouseEvent> | undefined) => {
+  const closeVersionModal = (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     setSelectedVersion(null);
   };
 
@@ -138,7 +138,7 @@ const VersionsPage = () => {
         <div className="text-red-500 text-center mb-4">
           <p>{error}</p>
           <button 
-            onClick={(event) => fetchVersions(event)} 
+            onClick={() => fetchVersions()} 
             className="mt-2 bg-blue-500 text-white px-4 py-2 rounded"
           >
             Retry
@@ -160,25 +160,25 @@ const VersionsPage = () => {
 
       <div className="mb-4 flex space-x-2 justify-center">
         <button 
-          onClick={(event) => fetchVersions({ website: testFilters.website })}
+          onClick={() => fetchVersions({ website: testFilters.website })}
           className="bg-blue-500 text-white px-4 py-2 rounded"
         >
           Test Website Filter
         </button>
         <button 
-          onClick={(event) => fetchVersions({ version: testFilters.version })}
+          onClick={() => fetchVersions({ version: testFilters.version })}
           className="bg-green-500 text-white px-4 py-2 rounded"
         >
           Test Version Filter
         </button>
         <button 
-          onClick={(event) => fetchVersions({ platform: testFilters.platform })}
+          onClick={() => fetchVersions({ platform: testFilters.platform })}
           className="bg-purple-500 text-white px-4 py-2 rounded"
         >
           Test Platform Filter
         </button>
         <button 
-          onClick={(event) => fetchVersions()}
+          onClick={() => fetchVersions()}
           className="bg-gray-500 text-white px-4 py-2 rounded"
         >
           Fetch All Versions
