@@ -1,7 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Define WebsiteVersion interface
+export interface WebsiteVersion {
+  version: string;
+  deploymentDate: string;
+  commitHash: string;
+  changelog: Array<{
+    type: 'feat' | 'fix' | 'docs' | 'chore';
+    description: string;
+    date: string;
+  }>;
+  type?: 'feat' | 'fix' | 'docs' | 'chore';
+  description?: string;
+  date?: string;
+  deploymentPlatform: 'Cloudflare Workers' | 'Cloudflare Workers/Pages';
+  links: {
+    website: string;
+    repository?: string;
+  };
+  native?: {
+    title: string;
+    description: string;
+    technicalDetails: string[];
+    challenges: string[];
+    learnings: string[];
+    imageUrl?: string;
+  };
+  originalCommits?: {
+    hash: string;
+    message: string;
+    date: string;
+    author: string;
+  }[];
+  hash?: string;
+  message?: string;
+  author?: string;
+}
+
 // Fetch versions from Cloudflare Workers KV or Worker
-async function fetchVersionsFromCloudflareWorkers(clientVersionData?: Partial<WebsiteVersion>): Promise<WebsiteVersion[]> {
+export async function fetchVersionsFromCloudflareWorkers(clientVersionData?: Partial<WebsiteVersion>): Promise<WebsiteVersion[]> {
   // Cloudflare Workers and Pages endpoints for version retrieval
   const CLOUDFLARE_VERSIONS_WORKERS_API = 'https://versions.zvielkoren.workers.dev/versions';
   const CLOUDFLARE_VERSIONS_PAGES_API = 'https://versions.zviel-websit.pages.dev/versions';
