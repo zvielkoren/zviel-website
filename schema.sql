@@ -1,0 +1,43 @@
+-- Create Demo table
+CREATE TABLE IF NOT EXISTS Demo (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  url TEXT,
+  imageUrl TEXT NOT NULL,
+  fileType TEXT,
+  filePath TEXT,
+  isActive INTEGER DEFAULT 1,
+  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create Feature table
+CREATE TABLE IF NOT EXISTS Feature (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  demoId TEXT NOT NULL,
+  isEnabled INTEGER DEFAULT 1,
+  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (demoId) REFERENCES Demo(id)
+);
+
+-- Create DemoFile table
+CREATE TABLE IF NOT EXISTS DemoFile (
+  id TEXT PRIMARY KEY,
+  demoId TEXT NOT NULL,
+  name TEXT NOT NULL,
+  path TEXT NOT NULL,
+  content BLOB NOT NULL,
+  fileType TEXT NOT NULL,
+  size INTEGER NOT NULL,
+  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (demoId) REFERENCES Demo(id)
+);
+
+-- Create indexes
+CREATE INDEX IF NOT EXISTS idx_demo_isActive ON Demo(isActive);
+CREATE INDEX IF NOT EXISTS idx_feature_demoId ON Feature(demoId);
+CREATE INDEX IF NOT EXISTS idx_demoFile_demoId ON DemoFile(demoId);

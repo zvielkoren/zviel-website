@@ -1,4 +1,3 @@
-main = ".worker-next/index.mjs"
 name = "zviel-website"
 compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
@@ -6,7 +5,7 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "zviel-website-db"
-database_id = "9b4a91e8-b258-4a5c-b672-b863d1207550"
+database_id = "YOUR_DATABASE_ID"  # Replace with your D1 database ID
 
 [build]
 command = "npm run build"
