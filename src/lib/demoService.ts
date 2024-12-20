@@ -18,6 +18,9 @@ export interface Demo {
     path: string;
   }[];
 }
+export const config = {
+  runtime: 'nodejs', // Add this line
+};
 
 export interface DemoData {
   demos: Demo[];
