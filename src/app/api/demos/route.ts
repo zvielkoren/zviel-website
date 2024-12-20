@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllDemos, createDemo, deleteDemo } from '@/lib/demoService';
-import { writeFile } from 'fs/promises';
 import path from 'path';
 import JSZip from 'jszip';
-
 
 export const runtime = 'edge';
 /**
