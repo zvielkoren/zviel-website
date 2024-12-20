@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAllDemos, createDemo, deleteDemo } from '@/lib/demoService';
 import path from 'path';
 import JSZip from 'jszip';
-import { writeFile } from 'fs/promises';
-
+const writeFile = require('fs').promises;
 export const runtime = 'edge';
 /**
  * GET /api/demos
