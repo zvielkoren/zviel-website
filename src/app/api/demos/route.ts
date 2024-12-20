@@ -4,8 +4,8 @@ import { writeFile } from 'fs/promises';
 import path from 'path';
 import JSZip from 'jszip';
 
-export const runtime = 'nodejs';
 
+export const runtime = 'edge';
 /**
  * GET /api/demos
  * Fetches a list of active demos along with their features and files.
