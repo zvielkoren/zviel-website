@@ -23,6 +23,26 @@ const languageConfigs: Record<string, RunnerConfig> = {
     language: 'typescript',
     timeout: 30000,
   },
+  java: {
+    language: 'java',
+    timeout: 30000,
+  },
+  c: {
+    language: 'c',
+    timeout: 30000,
+  },
+  cpp: {
+    language: 'cpp',
+    timeout: 30000,
+  },
+  go: {
+    language: 'go',
+    timeout: 30000,
+  },
+  rust: {
+    language: 'rust',
+    timeout: 30000,
+  },
 };
 
 export class CodeRunner {
@@ -62,6 +82,16 @@ export class CodeRunner {
         return 'javascript';
       case 'ts':
         return 'typescript';
+      case 'java':
+        return 'java';
+      case 'c':
+        return 'c';
+      case 'cpp':
+        return 'cpp';
+      case 'go':
+        return 'go';
+      case 'rs':
+        return 'rust';
       default:
         return 'unknown';
     }

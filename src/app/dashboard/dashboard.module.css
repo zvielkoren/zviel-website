@@ -1,74 +1,65 @@
-.main {
+.dashboard {
   padding: 2rem;
   min-height: 100vh;
+  background: #17212b;
 }
 
-.title {
-  font-size: 2.5rem;
-  margin-bottom: 2rem;
-  text-align: center;
-}
-
-.container {
+.addDemoForm {
   max-width: 800px;
-  margin: 0 auto 2rem;
+  margin: 0 auto 3rem;
   padding: 2rem;
-  background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-.container h2 {
-  margin-bottom: 1.5rem;
-}
-
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+.addDemoForm h2 {
+  margin: 0 0 2rem;
+  color: #ffffff;
+  font-size: 1.8rem;
+  font-weight: 600;
 }
 
 .formGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #4a5568;
   font-weight: 500;
+  font-size: 0.95rem;
 }
 
 .formGroup input,
 .formGroup textarea {
+  width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
   font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .formGroup textarea {
-  min-height: 100px;
+  min-height: 120px;
   resize: vertical;
-}
-
-.submitButton {
-  padding: 0.75rem 1.5rem;
-  background: #0070f3;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.submitButton:hover {
-  background: #0051a2;
 }
 
 .featureInput {
   display: flex;
   gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .featureInput input {
@@ -76,37 +67,73 @@
 }
 
 .featureInput button {
-  padding: 0.5rem 1rem;
-  background: #0070f3;
+  padding: 0.75rem 1.25rem;
+  background: #3b82f6;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
+  font-weight: 500;
   cursor: pointer;
+  transition: background 0.2s ease;
 }
 
-.featureList {
+.featureInput button:hover {
+  background: #2563eb;
+}
+
+.featuresList {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-top: 0.5rem;
 }
 
 .featureTag {
-  background: #f3f4f6;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  background: #edf2f7;
+  color: #4a5568;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-size: 0.9rem;
 }
 
-.featureTag button {
+.removeFeature {
   background: none;
   border: none;
-  color: #666;
+  color: #a0aec0;
   cursor: pointer;
   padding: 0;
   font-size: 1.2rem;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+
+.removeFeature:hover {
+  color: #e53e3e;
+}
+
+.submitButton {
+  width: 100%;
+  padding: 1rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 2rem;
+}
+
+.submitButton:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.submitButton:active {
+  transform: translateY(0);
 }
 
 .demosList {
@@ -114,12 +141,19 @@
   margin: 0 auto;
 }
 
+.demosList h2 {
+  margin: 0 0 1.5rem;
+  color: #ffffff;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
 .demoItem {
   background: white;
   padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1.5rem;
 }
 
 .demoHeader {
@@ -131,19 +165,31 @@
 
 .demoHeader h3 {
   margin: 0;
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: 600;
 }
 
 .deleteButton {
-  background: #dc2626;
+  padding: 0.5rem 1rem;
+  background: #ef4444;
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .deleteButton:hover {
-  background: #b91c1c;
+  background: #dc2626;
+}
+
+.demoItem p {
+  color: #4a5568;
+  line-height: 1.6;
+  margin: 0.5rem 0 1rem;
 }
 
 .demoControls {
@@ -153,50 +199,88 @@
   align-items: center;
 }
 
-.demoControls button {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.demoControls button:first-child {
-  background: #10b981;
-  color: white;
-}
-
-.demoControls button:last-child {
-  background: #ef4444;
-  color: white;
-}
-
 .fileType {
-  color: #666;
+  color: #718096;
   font-size: 0.9rem;
+  background: #f7fafc;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
 }
 
-.features {
-  margin-top: 1rem;
-  border-top: 1px solid #eee;
-  padding-top: 1rem;
+.filesList {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
 }
 
-.features h4 {
-  margin: 0 0 0.5rem;
+.filesList h4 {
+  margin: 0 0 0.75rem;
+  color: #2d3748;
+  font-size: 1rem;
 }
 
-.feature {
+.filesList ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.filesList li {
   margin: 0.5rem 0;
 }
 
-.feature label {
-  display: flex;
+.filesList a {
+  color: #3b82f6;
+  text-decoration: none;
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  cursor: pointer;
+  transition: color 0.2s ease;
 }
 
-.feature input[type="checkbox"] {
-  width: 1rem;
-  height: 1rem;
+.filesList a:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.features {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.features h4 {
+  margin: 0 0 0.75rem;
+  color: #2d3748;
+  font-size: 1rem;
+}
+
+.error {
+  color: #ef4444;
+  padding: 1rem;
+  background: #fef2f2;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 1rem;
+  }
+
+  .addDemoForm,
+  .demosList {
+    padding: 1.5rem;
+  }
+
+  .demoHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .deleteButton {
+    width: 100%;
+  }
 }

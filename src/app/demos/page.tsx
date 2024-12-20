@@ -21,7 +21,10 @@ export default function DemosPage() {
       try {
         const response = await fetch('/api/demos');
         const data = await response.json();
+        console.log('Fetched demos:', data); // Log the fetched data
         setDemos(data);
+        console.log('Demos state after fetch:', data); // Log the state after setting
+        console.log('Demos state after setting:', demos); // Log the state after setting
       } catch (error) {
         console.error('Error fetching demos:', error);
       }
@@ -29,6 +32,10 @@ export default function DemosPage() {
 
     fetchDemos();
   }, []);
+
+  useEffect(() => {
+    console.log('Demos state updated:', demos);
+  }, [demos]);
 
   const handleDemoClick = (demo: Demo) => {
     setSelectedDemo(demo);
@@ -42,29 +49,36 @@ export default function DemosPage() {
     <main className={styles.main}>
       <h1 className={styles.title}>Demo Applications</h1>
       <div className={styles.demosGrid}>
-        {demos.map((demo) => (
-          <div key={demo.id} className={styles.demoCard}>
-            <img src={demo.imageUrl} alt={demo.title} className={styles.demoImage} />
-            <h2>{demo.title}</h2>
-            <p>{demo.description}</p>
-            <div className={styles.demoActions}>
-              <button 
-                onClick={() => handleDemoClick(demo)} 
-                className={styles.viewButton}
-              >
-                View Demo
-              </button>
-              <a 
-                href={demo.url} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className={styles.openButton}
-              >
-                Open in New Tab
-              </a>
-            </div>
-          </div>
-        ))}
+        {Array.isArray(demos) && demos.length > 0 ? (
+          demos.map((demo) => {
+            console.log('Rendering demo:', demo); // Log each demo being rendered
+            return (
+              <div key={demo.id} className={styles.demoCard}>
+                <img src={demo.imageUrl} alt={demo.title} className={styles.demoImage} />
+                <h2>{demo.title}</h2>
+                <p>{demo.description}</p>
+                <div className={styles.demoActions}>
+                  <button 
+                    onClick={() => handleDemoClick(demo)} 
+                    className={styles.viewButton}
+                  >
+                    View Demo
+                  </button>
+                  <a 
+                    href={demo.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className={styles.openButton}
+                  >
+                    Open in New Tab
+                  </a>
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          <p>No demos available. Add a new demo to get started!</p>
+        )}
       </div>
 
       {selectedDemo && (
@@ -76,15 +90,10 @@ export default function DemosPage() {
                 onClick={handleCloseViewer}
                 className={styles.closeButton}
               >
-                ✕
+                Close
               </button>
             </div>
-            <iframe
-              src={selectedDemo.url}
-              className={styles.demoFrame}
-              title={selectedDemo.title}
-              sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-            />
+            <p>{selectedDemo.description}</p>
           </div>
         </div>
       )}

@@ -39,3 +39,6 @@ next-env.d.ts
 
 # wrangler
 wrangler.toml
+public/uploads/1733833925599-newbot.zip
+public/uploads/1733834486410-newbot.zip
+src/data/demos.json

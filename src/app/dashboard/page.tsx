@@ -3,10 +3,9 @@
 import { useState, useEffect } from 'react';
 import styles from './dashboard.module.css';
 
-interface Feature {
-  id: string;
+interface DemoFile {
   name: string;
-  isEnabled: boolean;
+  path: string;
 }
 
 interface Demo {
@@ -14,11 +13,11 @@ interface Demo {
   title: string;
   description: string;
   url?: string;
-  imageUrl: string;
+  imageUrl?: string;
   fileType?: string;
   filePath?: string;
-  features: Feature[];
-  isActive: boolean;
+  features: string[];
+  files: DemoFile[];
 }
 
 interface CustomFileInputProps extends React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> {
@@ -52,11 +51,9 @@ export default function DashboardPage() {
         throw new Error('Failed to fetch demos');
       }
       const data = await response.json();
-      setDemos(data);
-      setError(null);
+      setDemos(data.demos);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
-      setDemos([]);
+      setError(err instanceof Error ? err.message : 'Failed to fetch demos');
     } finally {
       setIsLoading(false);
     }
@@ -70,94 +67,59 @@ export default function DashboardPage() {
     e.preventDefault();
     try {
       const formDataToSend = new FormData();
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('url', formData.url);
+      formDataToSend.append('imageUrl', formData.imageUrl);
       
-      // Handle regular form fields
-      Object.entries(formData).forEach(([key, value]) => {
-        if (key === 'features') {
-          formDataToSend.append(key, JSON.stringify(value));
-        } else if (key !== 'files') {
-          if (value !== null) {
-            if (Array.isArray(value)) {
-              formDataToSend.append(key, JSON.stringify(value));
-            } else if (value && typeof value === 'object' && isFile(value)) {
-              formDataToSend.append(key, value);
-            } else {
-              formDataToSend.append(key, String(value));
-            }
-          }
-        }
+      formData.features.forEach(feature => {
+        formDataToSend.append('features[]', feature);
       });
 
-      // Handle files with their paths
-      if (formData.files) {
-        formData.files.forEach(({ file, path }) => {
-          if (file && typeof file === 'object' && isFile(file)) {
-            formDataToSend.append('files', file, path);
-          }
-        });
-      }
+      formData.files.forEach(({ file }) => {
+        formDataToSend.append('files[]', file);
+      });
 
       const response = await fetch('/api/demos', {
         method: 'POST',
-        body: formDataToSend
+        body: formDataToSend,
       });
 
-      if (response.ok) {
-        setFormData({
-          title: '',
-          description: '',
-          url: '',
-          imageUrl: '',
-          files: [],
-          features: []
-        });
-        fetchDemos();
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to add demo');
+      if (!response.ok) {
+        throw new Error('Failed to create demo');
       }
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      alert(error instanceof Error ? error.message : 'An error occurred');
-    }
-  };
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-
-    const formDataToUpdate = { ...formData };
-    
-    // Handle both files and directories
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const relativePath = file.webkitRelativePath || file.name;
-      
-      formDataToUpdate.files = formDataToUpdate.files || [];
-      formDataToUpdate.files.push({
-        file,
-        path: relativePath
+      // Reset form
+      setFormData({
+        title: '',
+        description: '',
+        url: '',
+        imageUrl: '',
+        files: [],
+        features: []
       });
-    }
-    
-    setFormData(formDataToUpdate);
-  };
+      setNewFeature('');
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+      // Refresh demos list
+      fetchDemos();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create demo');
+    }
   };
 
   const handleDeleteDemo = async (id: string) => {
     try {
-      await fetch('/api/demos', {
+      const response = await fetch(`/api/demos?id=${id}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete demo');
+      }
+
       fetchDemos();
-    } catch (error) {
-      console.error('Error deleting demo:', error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete demo');
     }
   };
 
@@ -171,58 +133,62 @@ export default function DashboardPage() {
     }
   };
 
-  const handleToggleFeature = async (demoId: string, featureId: string, isEnabled: boolean) => {
-    try {
-      await fetch('/api/demos/features', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: featureId, isEnabled: !isEnabled })
-      });
-      fetchDemos();
-    } catch (error) {
-      console.error('Error toggling feature:', error);
+  const handleRemoveFeature = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      features: prev.features.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      if (files.length === 0) {
+        console.error("No files selected.");
+        return; // Early return if no files are selected
+      }
+      const newFiles = Array.from(files).map(file => ({
+        file,
+        path: file.name
+      }));
+      setFormData(prev => ({
+        ...prev,
+        files: [...prev.files, ...newFiles]
+      }));
     }
   };
 
-  const handleRunDemo = async (id: string) => {
-    try {
-      await fetch('/api/demos/run', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
-      });
-    } catch (error) {
-      console.error('Error running demo:', error);
-    }
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
   };
 
-  const handleStopDemo = async (id: string) => {
-    try {
-      await fetch('/api/demos/run', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
-      });
-    } catch (error) {
-      console.error('Error stopping demo:', error);
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const files = e.dataTransfer.files;
+    if (files) {
+      const newFiles = Array.from(files).map(file => ({
+        file,
+        path: file.name
+      }));
+      setFormData(prev => ({
+        ...prev,
+        files: [...prev.files, ...newFiles]
+      }));
     }
   };
 
   return (
-    <main className={styles.main}>
-      <h1 className={styles.title}>Dashboard</h1>
-      
-      <div className={styles.container}>
+    <div className={styles.dashboard}>
+      <div className={styles.addDemoForm}>
         <h2>Add New Demo</h2>
-        <form onSubmit={handleSubmit} className={styles.form}>
+        <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
             <label htmlFor="title">Title</label>
             <input
               type="text"
               id="title"
-              name="title"
               value={formData.title}
-              onChange={handleChange}
+              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
               required
             />
           </div>
@@ -231,49 +197,58 @@ export default function DashboardPage() {
             <label htmlFor="description">Description</label>
             <textarea
               id="description"
-              name="description"
               value={formData.description}
-              onChange={handleChange}
+              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               required
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="url">Demo URL (Optional if uploading file)</label>
+            <label htmlFor="url">URL (optional)</label>
             <input
               type="url"
               id="url"
-              name="url"
               value={formData.url}
-              onChange={handleChange}
+              onChange={(e) => setFormData(prev => ({ ...prev, url: e.target.value }))}
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="file">Upload File(s) or Directory</label>
-            <input
-              type="file"
-              id="file"
-              onChange={handleFileSelect}
-              multiple
-              {...{
-                directory: '',
-                webkitdirectory: '',
-                accept: '.js,.py,.ts'
-              } as CustomFileInputProps}
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="imageUrl">Image URL</label>
+            <label htmlFor="imageUrl">Image URL (optional)</label>
             <input
               type="url"
               id="imageUrl"
-              name="imageUrl"
               value={formData.imageUrl}
-              onChange={handleChange}
-              required
+              onChange={(e) => setFormData(prev => ({ ...prev, imageUrl: e.target.value }))}
             />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="files">Upload Files</label>
+            <div
+              className={styles.fileDropArea}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+            >
+              <input
+                type="file"
+                id="files"
+                multiple
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+              />
+              <p>Drag and drop files here or click to upload</p>
+            </div>
+            {formData.files.length > 0 && (
+              <div className={styles.filesList}>
+                <h4>Selected Files:</h4>
+                <ul>
+                  {formData.files.map((file, index) => (
+                    <li key={index}>{file.file.name}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           <div className={styles.formGroup}>
@@ -285,18 +260,18 @@ export default function DashboardPage() {
                 onChange={(e) => setNewFeature(e.target.value)}
                 placeholder="Add a feature"
               />
-              <button type="button" onClick={handleAddFeature}>Add</button>
+              <button type="button" onClick={handleAddFeature}>
+                Add
+              </button>
             </div>
-            <div className={styles.featureList}>
+            <div className={styles.featuresList}>
               {formData.features.map((feature, index) => (
                 <div key={index} className={styles.featureTag}>
                   {feature}
                   <button
                     type="button"
-                    onClick={() => setFormData(prev => ({
-                      ...prev,
-                      features: prev.features.filter((_, i) => i !== index)
-                    }))}
+                    onClick={() => handleRemoveFeature(index)}
+                    className={styles.removeFeature}
                   >
                     ×
                   </button>
@@ -334,30 +309,37 @@ export default function DashboardPage() {
               <p>{demo.description}</p>
               {demo.filePath && (
                 <div className={styles.demoControls}>
-                  <button onClick={() => handleRunDemo(demo.id)}>Run Demo</button>
-                  <button onClick={() => handleStopDemo(demo.id)}>Stop Demo</button>
                   <span className={styles.fileType}>Type: {demo.fileType}</span>
+                </div>
+              )}
+              {demo.files && demo.files.length > 0 && (
+                <div className={styles.filesList}>
+                  <h4>Files:</h4>
+                  <ul>
+                    {demo.files.map((file, index) => (
+                      <li key={index}>
+                        <a href={file.path} target="_blank" rel="noopener noreferrer">
+                          {file.name}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
               <div className={styles.features}>
                 <h4>Features:</h4>
-                {demo.features.map((feature) => (
-                  <div key={feature.id} className={styles.feature}>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={feature.isEnabled}
-                        onChange={() => handleToggleFeature(demo.id, feature.id, feature.isEnabled)}
-                      />
-                      {feature.name}
-                    </label>
-                  </div>
-                ))}
+                <div className={styles.featuresList}>
+                  {demo.features.map((feature, index) => (
+                    <span key={index} className={styles.featureTag}>
+                      {feature}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
           ))
         )}
       </div>
-    </main>
+    </div>
   );
 }

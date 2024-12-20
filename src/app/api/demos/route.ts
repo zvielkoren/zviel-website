@@ -1,106 +1,141 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getD1Client } from '@/lib/db';
+import { getAllDemos, createDemo, deleteDemo } from '@/lib/demoService';
+import { writeFile } from 'fs/promises';
+import path from 'path';
+import JSZip from 'jszip';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 /**
  * GET /api/demos
  * Fetches a list of active demos along with their features and files.
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const db = getD1Client();
-
-    const results = await db.prepare(`
-      SELECT 
-        d.id, 
-        d.title, 
-        d.description, 
-        d.url, 
-        d.imageUrl, 
-        d.fileType, 
-        d.filePath,
-        GROUP_CONCAT(f.name) as features,
-        GROUP_CONCAT(df.path) as file_paths,
-        GROUP_CONCAT(df.name) as file_names
-       FROM Demo d
-       LEFT JOIN Feature f ON d.id = f.demoId
-       LEFT JOIN DemoFile df ON d.id = df.demoId
-       WHERE d.isActive = 1
-       GROUP BY d.id
-    `).all();
-
-    if (!results?.results) {
-      return NextResponse.json({ demos: [] });
-    }
-
-    const demos = results.results.map((row: any) => ({
-      id: row.id,
-      title: row.title,
-      description: row.description,
-      url: row.url,
-      imageUrl: row.imageUrl,
-      fileType: row.fileType,
-      filePath: row.filePath,
-      features: row.features ? row.features.split(',') : [],
-      files: row.file_paths
-        ? row.file_paths.split(',').map((path: string, index: number) => ({
-            path,
-            name: row.file_names ? row.file_names.split(',')[index] : null,
-          }))
-        : [],
-    }));
-
+    const demos = await getAllDemos();
+    console.log('Fetched demos:', demos); // Log the fetched data
     return NextResponse.json({ demos });
   } catch (error) {
     console.error('Error fetching demos:', error);
-
-    // Use type guard to handle 'unknown' type
-    if (error instanceof Error) {
-      return NextResponse.json(
-        { error: 'Failed to fetch demos', details: error.message },
-        { status: 500 }
-      );
-    }
-
-    // Handle generic unknown error
     return NextResponse.json(
-      { error: 'Failed to fetch demos', details: 'An unknown error occurred' },
+      { error: 'Failed to fetch demos', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
 }
-
 
 /**
- * DELETE /api/demos?id=<demoId>
- * Soft deletes a demo by setting isActive to 0.
+ * POST /api/demos
+ * Creates a new demo with the provided details and files.
  */
-export async function DELETE(request: NextRequest) {
+export async function POST(request: NextRequest) {
+  const headers = new Headers();
+  headers.set('Access-Control-Allow-Origin', '*'); // Adjust this in production
+  headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  headers.set('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Handle preflight request
+  if (request.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers });
+  }
+
   try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-
-    if (!id) {
-      return NextResponse.json({ error: 'Demo ID is required' }, { status: 400 });
-    }
-
-    const db = getD1Client();
-    await db.prepare(`UPDATE Demo SET isActive = 0 WHERE id = ?`).bind(id).run();
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting demo:', error);
-    function getErrorMessage(error: unknown): string {
-      return error instanceof Error ? error.message : 'An unknown error occurred';
+    const formData = await request.formData();
+    
+    // Extract form fields
+    const title = formData.get('title') as string;
+    const description = formData.get('description') as string;
+    const url = formData.get('url') as string;
+    const imageUrl = formData.get('imageUrl') as string;
+    const fileType = formData.get('fileType') as string;
+    const features = formData.getAll('features[]').map(f => f.toString());
+    
+    // Handle file uploads
+    const files = formData.getAll('files[]');
+    const uploadedFiles = [];
+    
+    if (files.length > 0) {
+      const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+      
+      for (const file of files) {
+        if (file instanceof File) {
+          if (file.type === 'application/zip') {
+            const zip = new JSZip();
+            try {
+              const unzippedFiles = await zip.loadAsync(file);
+              unzippedFiles.forEach(async (relativePath, fileData) => {
+                // Process each file in the unzipped content
+                const content = await fileData.async("blob"); 
+                const arrayBuffer = await content.arrayBuffer(); 
+                const buffer = Buffer.from(arrayBuffer); 
+                const fileName = `${Date.now()}-${relativePath}`;
+                const filePath = path.join(uploadsDir, fileName);
+                await writeFile(filePath, buffer); 
+                uploadedFiles.push({
+                  name: relativePath,
+                  path: `/uploads/${fileName}`
+                });
+              });
+            } catch (error) {
+              console.error("Error unzipping file:", error);
+              return NextResponse.json({ error: 'Failed to unzip the file' }, { status: 500 });
+            }
+          } else {
+            // Handle non-ZIP files
+            const fileName = `${Date.now()}-${file.name}`;
+            const filePath = path.join(uploadsDir, fileName);
+            const buffer = Buffer.from(await file.arrayBuffer());
+            
+            await writeFile(filePath, buffer);
+            uploadedFiles.push({
+              name: file.name,
+              path: `/uploads/${fileName}`
+            });
+          }
+        }
+      }
     }
     
-    // Usage in a catch block
+    // Create new demo
+    const newDemo = await createDemo({
+      title,
+      description,
+      url,
+      imageUrl,
+      fileType,
+      filePath: uploadedFiles[0]?.path,
+      features,
+      files: uploadedFiles
+    });
+    
+    return NextResponse.json({ success: true, demo: newDemo });
+  } catch (error) {
+    console.error('Error creating demo:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch demos', details: getErrorMessage(error) },
+      { error: 'Failed to create demo', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
-    
   }
 }
 
+/**
+ * DELETE /api/demos
+ * Deletes a demo by ID.
+ */
+export async function DELETE(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get('id'); // Extract ID from the request
+  try {
+    // Check if id is null
+    if (id === null) {
+      return NextResponse.json({ error: 'ID is required to delete a demo' }, { status: 400 });
+    }
+    if (id === null || id === undefined) {
+      return NextResponse.json({ error: 'ID is required to delete a demo' }, { status: 400 });
+    }
+    await deleteDemo(id); // Call the service to delete the demo
+    return NextResponse.json({ message: 'Demo deleted successfully' }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to delete demo' }, { status: 500 });
+  }
+}
