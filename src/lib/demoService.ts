@@ -12,7 +12,7 @@ export interface Demo {
   imageUrl?: string;
   fileType?: string;
   filePath?: string;
-  features: string[];
+  features: string[]; 
   files: {
     name: string;
     path: string;
