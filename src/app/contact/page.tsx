@@ -14,7 +14,7 @@ const ContactPage: React.FC = () => {
             color: '#589'  // Green color for heading
           }}
         >
-          Contact Us
+          Contact Me
         </Typography>
         <Typography 
           variant="body1" 
