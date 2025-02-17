@@ -142,5 +142,8 @@ export async function DELETE(request: NextRequest) {
 // Helper function to store files in D1
 async function storeFile(filePath: string, buffer: Buffer) {
   const client = await getD1Client();
-  await client.put(filePath, buffer);
+  // Assuming you have a table named 'Files' with columns 'path' and 'content'
+  await client.prepare(
+    'INSERT INTO Files (path, content) VALUES (?, ?)'
+  ).bind(filePath, buffer).run();
 }
