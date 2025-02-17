@@ -1,8 +1,5 @@
-import fs from 'fs/promises';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-
-const DEMOS_FILE = path.join(process.cwd(), 'src', 'data', 'demos.json');
 
 export interface Demo {
   id: string;
@@ -19,24 +16,22 @@ export interface Demo {
   }[];
 }
 export const config = {
-  runtime: 'nodejs', // Add this line
+  runtime: 'nodejs',
 };
 
 export interface DemoData {
   demos: Demo[];
 }
 
+// In-memory store
+let demoData: DemoData = { demos: [] };
+
 async function readDemosFile(): Promise<DemoData> {
-  try {
-    const data = await fs.readFile(DEMOS_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch (error) {
-    return { demos: [] };
-  }
+  return demoData;
 }
 
 async function writeDemosFile(data: DemoData): Promise<void> {
-  await fs.writeFile(DEMOS_FILE, JSON.stringify(data, null, 2));
+  demoData = data;
 }
 
 export async function getAllDemos(): Promise<Demo[]> {
@@ -49,6 +44,7 @@ export async function createDemo(demoData: Omit<Demo, 'id'>): Promise<Demo> {
   const newDemo = {
     ...demoData,
     id: uuidv4(),
+    createdAt: new Date().toISOString(), // Add creation timestamp
   };
   
   data.demos.push(newDemo);

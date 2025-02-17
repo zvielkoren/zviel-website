@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllDemos, createDemo, deleteDemo } from '@/lib/demoService';
-import path from 'path';
 import JSZip from 'jszip';
-const writeFile = require('fs').promises;
+import { getD1Client } from '@/lib/db';
+
 export const runtime = 'edge';
+
 /**
  * GET /api/demos
  * Fetches a list of active demos along with their features and files.
@@ -53,8 +54,6 @@ export async function POST(request: NextRequest) {
     const uploadedFiles = [];
     
     if (files.length > 0) {
-      const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
-      
       for (const file of files) {
         if (file instanceof File) {
           if (file.type === 'application/zip') {
@@ -67,11 +66,12 @@ export async function POST(request: NextRequest) {
                 const arrayBuffer = await content.arrayBuffer(); 
                 const buffer = Buffer.from(arrayBuffer); 
                 const fileName = `${Date.now()}-${relativePath}`;
-                const filePath = path.join(uploadsDir, fileName);
-                await writeFile(filePath, buffer); 
+                const filePath = `/uploads/${fileName}`;
+                // Store the file in D1
+                await storeFile(filePath, buffer);
                 uploadedFiles.push({
                   name: relativePath,
-                  path: `/uploads/${fileName}`
+                  path: filePath
                 });
               });
             } catch (error) {
@@ -81,13 +81,13 @@ export async function POST(request: NextRequest) {
           } else {
             // Handle non-ZIP files
             const fileName = `${Date.now()}-${file.name}`;
-            const filePath = path.join(uploadsDir, fileName);
+            const filePath = `/uploads/${fileName}`;
             const buffer = Buffer.from(await file.arrayBuffer());
-            
-            await writeFile(filePath, buffer);
+            // Store the file in D1
+            await storeFile(filePath, buffer);
             uploadedFiles.push({
               name: file.name,
-              path: `/uploads/${fileName}`
+              path: filePath
             });
           }
         }
@@ -128,12 +128,19 @@ export async function DELETE(request: NextRequest) {
     if (id === null) {
       return NextResponse.json({ error: 'ID is required to delete a demo' }, { status: 400 });
     }
-    if (id === null || id === undefined) {
-      return NextResponse.json({ error: 'ID is required to delete a demo' }, { status: 400 });
-    }
-    await deleteDemo(id); // Call the service to delete the demo
+      await deleteDemo(id); // Call the service to delete the demo
     return NextResponse.json({ message: 'Demo deleted successfully' }, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to delete demo' }, { status: 500 });
+    console.error('Error deleting demo:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete demo', details: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
   }
+}
+
+// Helper function to store files in D1
+async function storeFile(filePath: string, buffer: Buffer) {
+  const client = await getD1Client();
+  await client.put(filePath, buffer);
 }
