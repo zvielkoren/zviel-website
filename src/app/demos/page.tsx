@@ -19,12 +19,15 @@ export default function DemosPage() {
     // In a real application, this would fetch from an API
     const fetchDemos = async () => {
       try {
+        console.log('Fetching demos...'); // Log before fetching
         const response = await fetch('/api/demos');
+        if (!response.ok) {
+          throw new Error('Failed to fetch demos');
+        }
         const data = await response.json();
         console.log('Fetched demos:', data); // Log the fetched data
-        setDemos(data);
-        console.log('Demos state after fetch:', data); // Log the state after setting
-        console.log('Demos state after setting:', demos); // Log the state after setting
+        setDemos(data.demos);
+        console.log('Demos state after setting:', data.demos); // Log the state after setting
       } catch (error) {
         console.error('Error fetching demos:', error);
       }
