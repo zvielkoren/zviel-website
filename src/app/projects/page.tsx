@@ -13,6 +13,7 @@ interface Project {
   stars: number;
   language: string;
   updatedAt: string;
+  private: boolean;
 }
 
 const ProjectsPage = () => {
@@ -156,6 +157,9 @@ const ProjectsPage = () => {
                 <div className="flex items-center">
                   <FaCalendar className="mr-2 text-green-600" />
                   <span>Last Updated: {new Date(selectedProject.updatedAt).toLocaleDateString()}</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="mr-2 text-red-600">{selectedProject.private ? 'Private' : 'Public'}</span>
                 </div>
               </div>
               <div className="mt-6 flex justify-between">
