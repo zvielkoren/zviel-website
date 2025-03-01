@@ -4,6 +4,8 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaTimes } from "react-icons/fa";
 import Head from "next/head";
+import Loading from "@/components/Loading";
+import ErrorMessage from "@/components/ErrorMessage";
 
 interface Organization {
   name: string;
@@ -75,11 +77,11 @@ const OrganizationPage = () => {
   }, []);
 
   if (error) {
-    return <div className="error-message">Error: {error}</div>;
+    return <ErrorMessage message={error} />;
   }
 
   if (organizations.length === 0) {
-    return <div className="loading-message">Loading...</div>;
+    return <Loading />;
   }
 
   return (

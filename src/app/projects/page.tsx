@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { FaGithub, FaStar, FaTimes, FaCalendar, FaCode } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
+import Loading from "@/components/Loading";
+import ErrorMessage from "@/components/ErrorMessage";
 
 interface Project {
   id: string;
@@ -55,22 +57,11 @@ const ProjectsPage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-300"></div>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (error) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-red-500 text-center">
-          <h2 className="text-xl font-bold mb-2">Error</h2>
-          <p>{error}</p>
-        </div>
-      </div>
-    );
+    return <ErrorMessage message={error} />;
   }
 
   return (
