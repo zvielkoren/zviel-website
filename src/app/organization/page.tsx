@@ -10,7 +10,6 @@ import ErrorMessage from "@/components/ErrorMessage";
 interface Organization {
   name: string;
   mission: string;
-  values: string[];
   link: string;
   logo: string;
 }
@@ -136,19 +135,7 @@ const OrganizationPage = () => {
                 <p className="text-gray-700 mb-4">
                   {selectedOrganization.mission}
                 </p>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-semibold">Values</h3>
-                  {selectedOrganization.values &&
-                  selectedOrganization.values.length > 0 ? (
-                    selectedOrganization.values.map((value, index) => (
-                      <p key={index} className="text-gray-600">
-                        {value}
-                      </p>
-                    ))
-                  ) : (
-                    <p className="text-gray-600">No values available</p>
-                  )}
-                </div>
+
                 <div className="mt-6 flex justify-between">
                   <Link
                     href={`https://github.com/${selectedOrganization.name}`}
