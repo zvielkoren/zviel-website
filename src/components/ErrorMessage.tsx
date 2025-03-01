@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 const ErrorMessage: React.FC<{ message: string }> = ({ message }) => (
   <div className="flex justify-center items-center min-h-screen">
