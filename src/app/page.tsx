@@ -39,7 +39,7 @@ export default function Home() {
               👨‍💻 View Projects
             </Button>
           </Link>
-        <
+        
       </section>
 
       <section id="skills" className="w-full max-w-4xl my-16">
