@@ -8,6 +8,7 @@ import ErrorMessage from '@/components/ErrorMessage';
 import { motion, AnimatePresence } from 'framer-motion';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
+import type { ComponentProps } from 'react';
 
 interface Project {
   id: string;
@@ -52,7 +53,6 @@ export default function ProjectModalPage() {
         setProject(proj);
         setError(null);
 
-        // Fetch README via API route or GitHub
         const readmeRes = await fetch(`/api/projects/${proj.ownerName}/${proj.name}`);
         if (!readmeRes.ok) throw new Error('Failed to fetch README');
         const readmeData = await readmeRes.json();
@@ -129,50 +129,54 @@ export default function ProjectModalPage() {
 
           {/* README Markdown */}
           <div className="max-w-none bg-blue-800/70 text-blue-100 p-6 rounded-md overflow-x-auto">
-  <ReactMarkdown
-    children={readme || 'No README available.'}
-    remarkPlugins={[remarkGfm]}
-    rehypePlugins={[rehypeRaw]}
-    components={{
-      code({ node, inline, className, children, ...props }) {
-        return (
-          <code
-            className={`bg-blue-700 text-blue-100 px-2 py-1 rounded text-sm ${
-              inline ? 'inline' : 'block my-2'
-            }`}
-            {...props}
-          >
-            {children}
-          </code>
-        );
-      },
-      pre({ node, className, children, ...props }) {
-        return (
-          <pre
-            className="bg-blue-700 text-blue-100 p-4 rounded-md overflow-x-auto my-4"
-            {...props}
-          >
-            {children}
-          </pre>
-        );
-      },
-      a({ node, href, children, ...props }) {
-        return (
-          <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-200 hover:underline"
-            {...props}
-          >
-            {children}
-          </a>
-        );
-      },
-    }}
-  />
-</div>
-    
+            <ReactMarkdown
+              children={readme || 'No README available.'}
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeRaw]}
+              components={{
+                code({
+                  inline,
+                  className,
+                  children,
+                  ...props
+                }: ComponentProps<'code'> & { inline?: boolean }) {
+                  return (
+                    <code
+                      className={`bg-blue-700 text-blue-100 px-2 py-1 rounded text-sm ${
+                        inline ? 'inline' : 'block my-2'
+                      }`}
+                      {...props}
+                    >
+                      {children}
+                    </code>
+                  );
+                },
+                pre({ className, children, ...props }) {
+                  return (
+                    <pre
+                      className="bg-blue-700 text-blue-100 p-4 rounded-md overflow-x-auto my-4"
+                      {...props}
+                    >
+                      {children}
+                    </pre>
+                  );
+                },
+                a({ href, children, ...props }) {
+                  return (
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-200 hover:underline"
+                      {...props}
+                    >
+                      {children}
+                    </a>
+                  );
+                },
+              }}
+            />
+          </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>
