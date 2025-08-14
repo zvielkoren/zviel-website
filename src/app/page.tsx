@@ -28,18 +28,21 @@ export default function Home() {
           in modern web technologies. I love creating efficient, scalable, and
           user-friendly applications.
         </p>
-        <div className="flex space-x-4">
-          <Link href="/projects">
-            <Button
-              color="primary"
-              variant="solid"
-              size="lg"
-              className="font-bold bg-[#2c3e50] hover:bg-[#34495e] transition-colors duration-300 px-8 py-4 rounded-full shadow-lg text-lg"
-            >
+
+        <Button
+          color="primary"
+          variant="solid"
+          size="lg"
+          className="flex space-x-4 font-bold bg-[#2c3e50] hover:bg-[#34495e] transition-colors duration-300 px-8 py-4 rounded-full shadow-lg text-lg"
+          as="a"
+          href="/projects"
+        >
+          {" "}
+
               👨‍💻 View Projects
-            </Button>
-          </Link>
-        </div>
+
+        </Button>
+    
       </section>
 
       <section id="skills" className="w-full max-w-4xl my-16">
