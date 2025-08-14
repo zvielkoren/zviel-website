@@ -1,6 +1,6 @@
 // /app/api/projects/[owner]/[repo]/route.ts
 import { NextResponse } from "next/server";
-
+export const runtime = 'edge';
 export async function GET(
   req: Request,
   { params }: { params: { owner: string; repo: string } }

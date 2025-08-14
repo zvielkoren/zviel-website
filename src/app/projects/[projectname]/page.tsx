@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import type { ComponentProps } from 'react';
-
+ export const runtime = 'edge';
 interface Project {
   id: string;
   name: string;
