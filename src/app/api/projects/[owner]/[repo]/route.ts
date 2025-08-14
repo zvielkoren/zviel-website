@@ -1,6 +1,8 @@
 // /app/api/projects/[owner]/[repo]/route.ts
 import { NextResponse } from "next/server";
+
 export const runtime = 'edge';
+
 export async function GET(
   req: Request,
   { params }: { params: { owner: string; repo: string } }
@@ -23,6 +25,10 @@ export async function GET(
     });
 
     if (!res.ok) {
+      if (res.status === 404) {
+        // README not found
+        return NextResponse.json({ readme: "" }, { status: 200 });
+      }
       return NextResponse.json(
         { error: "Failed to fetch README" },
         { status: res.status }
