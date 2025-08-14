@@ -12,6 +12,7 @@ interface Project {
   description: string;
   githubLink: string;
   owner: string;
+  ownerName: string;
   stars: number;
   language: string;
   updatedAt: string;
@@ -83,7 +84,7 @@ const ProjectsPage = () => {
             onClick={() => openProjectModal(project)}
             className="bg-gradient-to-br from-[#6e89a8] to-[#7a97b8] shadow-lg rounded-lg p-6 hover:shadow-xl transition-shadow duration-300 cursor-pointer"
           >
-            <h2 className="text-xl font-semibold mb-2 text-gray-800">{project.name}</h2>
+            <h2 className="text-xl font-semibold mb-2 text-gray-800">{project.name} | By: {project.ownerName}</h2>
             <p className="text-gray-600 mb-4 h-20 overflow-y-auto">
               {project.description || 'No description available'}
             </p>
@@ -134,7 +135,7 @@ const ProjectsPage = () => {
               >
                 <FaTimes size={24} />
               </button>
-              <h2 className="text-2xl font-bold mb-4">{selectedProject.name}</h2>
+              <h2 className="text-2xl font-bold mb-4">{selectedProject.name} | By: {selectedProject.ownerName}</h2>
               <p className="text-gray-700 mb-4">{selectedProject.description}</p>
               <div className="space-y-2">
                 <div className="flex items-center">

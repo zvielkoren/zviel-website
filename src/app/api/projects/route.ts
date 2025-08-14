@@ -6,6 +6,7 @@ import { Octokit } from "@octokit/rest";
 export const runtime = 'edge';
 // Add type definition for GitHub Repository
 interface GitHubRepository {
+  owner: any;
   id: number;
   name: string;
   description: string | null;
@@ -46,7 +47,8 @@ export async function GET() {
           name: repo.name,
           description: repo.description || "",
           githubLink: repo.html_url,
-          owner: id,
+          owner: id, 
+          ownerName: repo.owner?.login || "Unknown",
           stars: repo.stargazers_count,
           language: repo.language,
           updatedAt: repo.updated_at,
