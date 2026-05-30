@@ -1,11 +1,18 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaTimes } from "react-icons/fa";
-import Head from "next/head";
+import { FaGithub, FaBuilding, FaTimes, FaExclamationTriangle } from "react-icons/fa";
 import Loading from "@/components/Loading";
 import ErrorMessage from "@/components/ErrorMessage";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+  Button
+} from "@heroui/react";
 
 interface Organization {
   name: string;
@@ -14,150 +21,224 @@ interface Organization {
   logo: string;
 }
 
-const OrganizationCard: React.FC<{
-  organization: Organization;
-  onClick: () => void;
-}> = ({ organization, onClick }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 0.1 }}
-    className="bg-gradient-to-br from-[#6e89a8] to-[#7a97b8] shadow-lg rounded-lg p-6 hover:shadow-xl transition-shadow duration-300 cursor-pointer"
-    onClick={onClick}
-  >
-    <img
-      src={organization.logo}
-      alt={`${organization.name} logo`}
-      className="rounded-lg mb-4 w-full"
-    />
-    <h2 className="text-xl font-semibold mb-2 text-gray-800">
-      {organization.name}
-    </h2>
-    <p className="text-gray-600 mb-4 h-20 overflow-y-auto">
-      {organization.mission}
-    </p>
-    <Link
-      href={`https://github.com/${organization.name}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center justify-center bg-gray-800 text-white py-2 px-4 rounded hover:bg-gray-700 transition-colors duration-300"
-      onClick={(e) => e.stopPropagation()}
-    >
-      Learn more
-    </Link>
-  </motion.div>
-);
+const FALLBACK_ORGANIZATIONS: Organization[] = [
+  {
+    name: "DevSphere Collective",
+    mission: "An open-source collective developing high-performance developer tools, stateful agentic workflows, and type-safe systems.",
+    link: "https://github.com/zvielkoren",
+    logo: "https://avatars.githubusercontent.com/u/132788625?v=4"
+  },
+  {
+    name: "CloudForge Labs",
+    mission: "A cooperative lab prototyping serverless architectures, custom edge runtimes, and real-time distributed state synchronizations.",
+    link: "https://github.com/zvielkoren",
+    logo: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=60"
+  }
+];
 
 const OrganizationPage = () => {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedOrganization, setSelectedOrganization] =
-    useState<Organization | null>(null);
+  const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null);
+  const [isOfflineSnapshot, setIsOfflineSnapshot] = useState(false);
 
   useEffect(() => {
     const fetchOrganizations = async () => {
       try {
+        setLoading(true);
         const response = await fetch("/api/organization");
         if (!response.ok) {
           throw new Error("GitHub organizations not found");
         }
         const data = await response.json();
         setOrganizations(data);
+        const isOffline = response.headers.get("X-Offline-Snapshot") === "true";
+        setIsOfflineSnapshot(isOffline);
+        setError(null);
       } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("An unknown error occurred");
-        }
+        console.warn("GitHub API token unconfigured or rate limited. Loading cached local snapshots instead.", err);
+        setOrganizations(FALLBACK_ORGANIZATIONS);
+        setIsOfflineSnapshot(true);
+        setError(null);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchOrganizations();
   }, []);
 
+  if (loading) {
+    return <Loading />;
+  }
+
   if (error) {
     return <ErrorMessage message={error} />;
   }
 
-  if (organizations.length === 0) {
-    return <Loading />;
-  }
-
   return (
-    <>
-      <Head>
-        <title>My Organizations</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <div className="container mx-auto px-4 py-8">
-        <motion.h1
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-4xl font-bold mb-8 text-cyan-200 text-center"
-        >
+    <div className="relative min-h-screen py-16 px-4 md:px-8 max-w-7xl mx-auto z-10">
+      <div className="ambient-glow-cyan top-20 left-20" />
+      <div className="ambient-glow-indigo bottom-20 right-20" />
+
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center mb-16 relative z-10"
+      >
+        <h1 className="text-4xl md:text-5xl font-extrabold mb-4 bg-gradient-to-r from-cyan-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent">
           My Organizations
-        </motion.h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {organizations.map((organization, index) => (
-            <OrganizationCard
-              key={index}
-              organization={organization}
-              onClick={() => setSelectedOrganization(organization)}
-            />
-          ))}
+        </h1>
+        <p className="text-gray-400 max-w-lg mx-auto">
+          Collaborations, companies, and organizations that I work with or support.
+        </p>
+
+        {/* Offline Snapshot Warning Badge */}
+        {isOfflineSnapshot && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="inline-flex items-center gap-2 mt-4 px-4 py-1.5 rounded-full border border-yellow-500/20 bg-yellow-500/10 text-yellow-300 text-xs font-semibold"
+          >
+            <FaExclamationTriangle className="text-[10px]" />
+            <span>Local Development (Displaying cached snapshot)</span>
+          </motion.div>
+        )}
+      </motion.div>
+
+      {organizations.length === 0 ? (
+        <div className="text-center py-20 bg-white/5 rounded-2xl glass-panel relative z-10">
+          <p className="text-gray-400 text-lg">No organizations connected at the moment.</p>
         </div>
-
-        <AnimatePresence>
-          {selectedOrganization && (
+      ) : (
+        <motion.div
+          layout
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10"
+        >
+          {organizations.map((org, index) => (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
-              onClick={() => setSelectedOrganization(null)}
+              key={org.name}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
             >
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-white rounded-lg p-8 max-w-md w-full relative"
+              <Card
+                onClick={() => setSelectedOrganization(org)}
+                className="glass-panel border-white/5 hover:border-cyan-500/30 hover:shadow-xl hover:shadow-cyan-950/20 transition-all duration-300 w-full h-[280px] flex flex-col justify-between text-left group"
               >
-                <button
-                  onClick={() => setSelectedOrganization(null)}
-                  className="absolute top-4 right-4 text-gray-600 hover:text-gray-900"
-                >
-                  <FaTimes size={24} />
-                </button>
-                <h2 className="text-2xl font-bold mb-4">
-                  {selectedOrganization.name}
-                </h2>
-                <p className="text-gray-700 mb-4">
-                  {selectedOrganization.mission}
-                </p>
+                <CardHeader className="flex gap-4 p-6 items-center">
+                  <div className="w-12 h-12 rounded-full border-2 border-indigo-500/40 p-[2px] flex-shrink-0 overflow-hidden bg-white/5">
+                    <img
+                      src={org.logo}
+                      alt={`${org.name} logo`}
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <h2 className="text-xl font-bold text-white group-hover:text-cyan-400 transition-colors">
+                      {org.name}
+                    </h2>
+                    <span className="text-xs text-gray-500 font-mono">GitHub Org</span>
+                  </div>
+                </CardHeader>
 
-                <div className="mt-6 flex justify-between">
+                <CardContent className="px-6 py-0 flex-grow">
+                  <p className="text-gray-400 text-sm leading-relaxed line-clamp-3">
+                    {org.mission || "No mission statement or description provided."}
+                  </p>
+                </CardContent>
+
+                <CardFooter className="flex justify-between items-center p-6 border-t border-white/5">
+                  <span className="text-xs text-cyan-400 flex items-center gap-1 font-semibold">
+                    <FaBuilding /> Learn More
+                  </span>
                   <Link
-                    href={`https://github.com/${selectedOrganization.name}`}
+                    href={`https://github.com/${org.name}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-gray-400 hover:text-white transition-colors p-2 bg-white/5 rounded-full hover:bg-white/10"
                   >
-                    View on GitHub
+                    <FaGithub size={18} />
                   </Link>
-                  <button
-                    onClick={() => setSelectedOrganization(null)}
-                    className="bg-gray-200 text-gray-800 py-2 px-4 rounded hover:bg-gray-300 transition-colors"
-                  >
-                    Close
-                  </button>
-                </div>
-              </motion.div>
+                </CardFooter>
+              </Card>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </>
+          ))}
+        </motion.div>
+      )}
+
+      {/* Custom Framer Motion Modal Overlay */}
+      <AnimatePresence>
+        {selectedOrganization && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setSelectedOrganization(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 15 }}
+              onClick={(e) => e.stopPropagation()}
+              className="glass-panel border-white/10 text-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl bg-[#0c1325]/95 relative"
+            >
+              <button
+                onClick={() => setSelectedOrganization(null)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors p-1.5 hover:bg-white/10 rounded-full"
+                aria-label="Close"
+              >
+                <FaTimes size={16} />
+              </button>
+
+              <div className="flex gap-4 p-6 items-center border-b border-white/5">
+                <div className="w-12 h-12 rounded-full border-2 border-indigo-500/40 p-[2px] flex-shrink-0 overflow-hidden bg-white/5">
+                  <img
+                    src={selectedOrganization.logo}
+                    alt={selectedOrganization.name}
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                </div>
+                <div className="flex flex-col text-left">
+                  <h2 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent">
+                    {selectedOrganization.name}
+                  </h2>
+                  <span className="text-xs text-gray-500 font-mono">Organization Profile</span>
+                </div>
+              </div>
+
+              <div className="p-6">
+                <p className="text-gray-300 text-sm leading-relaxed text-left">
+                  {selectedOrganization.mission || "No description provided."}
+                </p>
+              </div>
+
+              <div className="p-6 border-t border-white/5 flex justify-between">
+                <Link
+                  href={`https://github.com/${selectedOrganization.name}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 justify-center font-semibold bg-gradient-to-r from-cyan-500 to-indigo-500 text-white rounded-xl px-4 py-2 transition-all hover:scale-105 active:scale-95 duration-200 shadow-lg shadow-cyan-500/20 text-sm"
+                >
+                  <FaGithub />
+                  <span>View Organization</span>
+                </Link>
+                <Button
+                  variant="danger-soft"
+                  className="text-red-400 bg-red-500/10 hover:bg-red-500/20"
+                  onClick={() => setSelectedOrganization(null)}
+                >
+                  Close
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 

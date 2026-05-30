@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import type { D1Database } from '@cloudflare/workers-types';
 import { CodeRunner } from '@/utils/codeRunner';
 
 // Add Edge Runtime configuration
@@ -7,11 +6,11 @@ export const runtime = 'edge';
 
 // Extend the global scope to include D1
 declare global {
-  var D1: D1Database | undefined;
+  var D1: any;
 }
 
 // Initialize D1 database
-const d1Database: D1Database = globalThis.D1 as D1Database;
+const d1Database = globalThis.D1;
 
 export async function POST(request: NextRequest) {
   try {

@@ -7,7 +7,7 @@ const NavLinksContainer = styled.div`
   gap: 1rem;
 `;
 
-const StyledAnchor = styled.a`
+const StyledLink = styled(Link)`
   color: white;
   text-decoration: none;
   &:hover {
@@ -18,25 +18,15 @@ const StyledAnchor = styled.a`
 const NavLinks: React.FC = () => {
   return (
     <NavLinksContainer>
-      <Link href="/">
-        <StyledAnchor>Home</StyledAnchor>
-      </Link>
+      <StyledLink href="/">Home</StyledLink>
 
-      <Link href="/projects">
-        <StyledAnchor>Projects</StyledAnchor>
-      </Link>
+      <StyledLink href="/projects">Projects</StyledLink>
 
-      <Link href="/versions">
-        <StyledAnchor>Versions</StyledAnchor>
-      </Link>
+      <StyledLink href="/versions">Versions</StyledLink>
 
-      <Link href="/organization">
-        <StyledAnchor>Organizations</StyledAnchor>
-      </Link>
+      <StyledLink href="/organization">Organizations</StyledLink>
 
-      <Link href="/contact">
-        <StyledAnchor>Contact</StyledAnchor>
-      </Link>
+      <StyledLink href="/contact">Contact</StyledLink>
     </NavLinksContainer>
   );
 };

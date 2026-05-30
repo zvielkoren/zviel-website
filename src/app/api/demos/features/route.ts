@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import type { D1Database } from '@cloudflare/workers-types';
 import { getD1Client } from '@/lib/db';
 
 // Add Edge Runtime configuration
@@ -7,7 +6,7 @@ export const runtime = 'edge';
 
 export async function POST(request: Request) {
   try {
-    const d1Database: D1Database = getD1Client();
+    const d1Database = getD1Client();
     const { demoId, featureName } = await request.json();
 
     // Validate input
@@ -43,7 +42,7 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const d1Database: D1Database = getD1Client();
+    const d1Database = getD1Client();
     const { id, isEnabled } = await request.json();
 
     const result = await d1Database.prepare(
@@ -64,7 +63,7 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const d1Database: D1Database = getD1Client();
+    const d1Database = getD1Client();
     const { featureId } = await request.json();
 
     if (!featureId) {

@@ -1,0 +1,22 @@
+# pnpm-workspace.yaml
+packages:
+  - '.'
+
+# FIX: Move to top-level and use camelCase
+autoInstallPeers: true
+
+# Authorized Binaries (Replaces onlyBuiltDependencies)
+allowBuilds:
+  esbuild: true
+  sharp: true
+  workerd: true
+
+# Silences the deprecation warnings
+allowedDeprecatedVersions:
+  glob: "9.3.5"
+  node-domexception: "1.0.0"
+
+# Skips security delay for these specific packages
+minimumReleaseAgeExclude:
+  - "@next/env"
+  - "@prisma/debug"

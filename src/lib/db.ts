@@ -1,10 +1,8 @@
-import { D1Database } from "@cloudflare/workers-types";
-
 declare global {
-  var D1: D1Database | undefined;
+  var D1: any;
 }
 
-export function getD1Client(): D1Database {
+export function getD1Client(): any {
   if (!globalThis.D1) {
     throw new Error("D1 database not available");
   }

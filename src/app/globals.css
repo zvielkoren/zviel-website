@@ -1,10 +1,132 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "@heroui/styles";
+
+@theme {
+  --color-background: #080e1b;
+  --color-foreground: #ffffff;
+}
 
 @layer base {
-
   body {
-    @apply bg-[#17212b];
+    @apply bg-[#080e1b] text-white antialiased selection:bg-cyan-500/30 selection:text-cyan-200;
+  }
+
+  /* Hide native cursor globally — CustomCursorAndMenu renders its own */
+  html:not(.a11y-cursor-large) *,
+  html:not(.a11y-cursor-large) {
+    cursor: none !important;
   }
 }
+
+/* Beautiful mesh glow backgrounds */
+.ambient-glow-cyan {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, rgba(13, 148, 136, 0.02) 50%, rgba(0, 0, 0, 0) 100%);
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ambient-glow-indigo {
+  position: absolute;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, rgba(79, 70, 229, 0.02) 60%, rgba(0, 0, 0, 0) 100%);
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Glassmorphism utility */
+.glass-panel {
+  background: rgba(22, 30, 49, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ==========================================================================
+   WCAG 2.0 AA & Israeli Regulation 35 - Accessibility Preference Overrides
+   ========================================================================== */
+
+/* 1. High Contrast */
+.a11y-contrast-high {
+  --color-background: #000000 !important;
+  --color-foreground: #ffff00 !important;
+  background-color: #000000 !important;
+  color: #ffff00 !important;
+}
+.a11y-contrast-high body {
+  background-color: #000000 !important;
+  color: #ffff00 !important;
+}
+.a11y-contrast-high * {
+  background-color: transparent !important;
+  background-image: none !important;
+  color: #ffff00 !important;
+  border-color: #ffff00 !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+.a11y-contrast-high a, 
+.a11y-contrast-high button, 
+.a11y-contrast-high [role="button"] {
+  color: #00ffff !important;
+  text-decoration: underline !important;
+  border: 2px solid #ffff00 !important;
+  background-color: #000000 !important;
+  padding: 4px 8px !important;
+}
+.a11y-contrast-high a:hover, 
+.a11y-contrast-high button:hover {
+  background-color: #ffff00 !important;
+  color: #000000 !important;
+}
+
+/* 2. Monochrome */
+.a11y-contrast-monochrome {
+  filter: grayscale(100%) !important;
+}
+
+/* 3. Text Size Scaling */
+html.a11y-text-large {
+  font-size: 19px !important;
+}
+
+html.a11y-text-extra-large {
+  font-size: 22px !important;
+}
+
+/* 4. Line Spacing */
+.a11y-spacing-wide * {
+  line-height: 1.85 !important;
+  letter-spacing: 0.08em !important;
+  word-spacing: 0.12em !important;
+}
+
+.a11y-spacing-extra-wide * {
+  line-height: 2.15 !important;
+  letter-spacing: 0.14em !important;
+  word-spacing: 0.22em !important;
+}
+
+/* 5. Giant Cursor */
+.a11y-cursor-large,
+.a11y-cursor-large * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 32 32'%3E%3Cpath fill='%2300ffff' stroke='%23000000' stroke-width='2.5' stroke-linejoin='round' d='M0,0 L0,24 L6.5,17.5 L12,29 L16,27 L10.5,15.5 L18,15.5 Z'/%3E%3C/svg%3E"), auto !important;
+}
+
+/* 6. Reduced Motion */
+.a11y-motion-reduced,
+.a11y-motion-reduced * {
+  animation-delay: -1ms !important;
+  animation-duration: 1ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+  scroll-behavior: auto !important;
+  transform: none !important;
+}
+

@@ -1,126 +1,184 @@
+"use client";
+
+import React from "react";
 import Image from "next/image";
-import { Button } from "@nextui-org/react";
 import Link from "next/link";
+import { motion, Variants } from "framer-motion";
+import { LiveClock } from "@/utils/liveClock";
+import { Card, CardHeader, CardContent, Chip, Button } from "@heroui/react";
+import { FaArrowRight, FaEnvelope, FaCode, FaServer, FaBrain } from "react-icons/fa";
 
 export default function Home() {
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+      },
+    },
+  };
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 100, damping: 15 },
+    },
+  };
+
+  const topSkills = ["TypeScript", "Java", "Python", "SQL", "Rust"];
+  const otherSkills = ["JavaScript", "Next.js", "C#", "Node.js", "Kotlin", "React", "Docker", "Git"];
+
   return (
-    <main
-      className="flex min-h-screen flex-col items-center justify-between p-24"
-      style={{ backgroundColor: "#17212b", color: "white" }}
-    >
-      <header className="w-full text-center">
-        <h1 className="text-4xl font-bold mb-4">Zviel Koren</h1>
-        <p className="text-xl">Full Stack Developer</p>
-      </header>
+    <main className="relative min-h-screen overflow-hidden py-16 px-4 md:px-8 max-w-7xl mx-auto flex flex-col justify-between z-10">
+      {/* Decorative ambient glowing grids */}
+      <div className="ambient-glow-cyan top-1/4 -left-32" />
+      <div className="ambient-glow-indigo top-1/2 -right-32" />
 
-      <section className="flex flex-col items-center">
-        {/* <Image
-          src="/profile-picture.png"
-          alt="Zviel Koren"
-          width={200}
-          height={200}
-          className="rounded-full mb-8"
-          draggable="false"
-  
-        /> */}
-        <p className="text-center max-w-2xl mb-8">
-          Hi, I'm Zviel Koren, a passionate full stack developer with expertise
-          in modern web technologies. I love creating efficient, scalable, and
-          user-friendly applications.
-        </p>
+      {/* Hero Section */}
+      <motion.section
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="flex flex-col items-center text-center mt-8 md:mt-16 mb-20 relative z-10"
+      >
+        <motion.div variants={itemVariants} className="relative mb-8 group">
+          <div className="absolute inset-0 bg-gradient-to-tr from-cyan-400 to-indigo-500 rounded-full blur-md opacity-70 group-hover:opacity-100 transition-opacity duration-300 animate-pulse" />
+          <div className="relative border-4 border-[#080e1b] rounded-full overflow-hidden w-40 h-40">
+            <Image
+              src="/profile-picture.png"
+              alt="Zviel Koren"
+              fill
+              sizes="160px"
+              className="object-cover scale-105 group-hover:scale-110 transition-transform duration-300"
+              draggable="false"
+              priority
+            />
+          </div>
+        </motion.div>
 
-        <Button
-          color="primary"
-          variant="solid"
-          size="lg"
-          className="flex space-x-4 font-bold bg-[#2c3e50] hover:bg-[#34495e] transition-colors duration-300 px-8 py-4 rounded-full shadow-lg text-lg"
-          as="a"
-          href="/projects"
+        <motion.h1
+          variants={itemVariants}
+          className="text-5xl md:text-7xl font-extrabold tracking-tight mb-4"
         >
-          {" "}
+          <span className="bg-gradient-to-r from-cyan-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent">
+            Zviel Koren
+          </span>
+        </motion.h1>
 
-              👨‍💻 View Projects
+        <motion.p
+          variants={itemVariants}
+          className="text-xl md:text-2xl text-gray-400 font-medium mb-8 max-w-lg"
+        >
+          Full Stack Developer
+        </motion.p>
 
-        </Button>
-    
-      </section>
+        <motion.p
+          variants={itemVariants}
+          className="text-base md:text-lg text-gray-300 max-w-2xl leading-relaxed mb-10 px-4"
+        >
+          Hi, I'm Zviel, a passionate developer dedicated to engineering elegant, highly
+          scalable, and high-performance digital experiences. I specialize in modern backend
+          architecture, type-safe frontend design, and responsive interactive products.
+        </motion.p>
 
-      <section id="skills" className="w-full max-w-4xl my-16">
-        <h2 className="text-3xl font-bold mb-8 text-center">Skills</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          <div className="bg-gray-800 rounded-lg p-6 shadow-xl">
-            <h3 className="text-2xl font-semibold mb-6 text-center text-white-400">
-              Top Skills
-            </h3>
-            <ul className="flex flex-wrap justify-center gap-4">
-              <li className="bg-gray-600 rounded-full px-5 py-2 text-lg font-medium shadow-lg transition-all hover:bg-gray-500 hover:scale-105">
-                TypeScript
-              </li>
-              <li className="bg-gray-600 rounded-full px-5 py-2 text-lg font-medium shadow-lg transition-all hover:bg-gray-500 hover:scale-105">
-                Java
-              </li>
-              <li className="bg-gray-600 rounded-full px-5 py-2 text-lg font-medium shadow-lg transition-all hover:bg-gray-500 hover:scale-105">
-                Python
-              </li>
-              <li className="bg-gray-600 rounded-full px-5 py-2 text-lg font-medium shadow-lg transition-all hover:bg-gray-500 hover:scale-105">
-                SQL
-              </li>
-              <li className="bg-gray-600 rounded-full px-5 py-2 text-lg font-medium shadow-lg transition-all hover:bg-gray-500 hover:scale-105">
-                Rust
-              </li>
-            </ul>
-          </div>
-          <div className="bg-gray-800 rounded-lg p-6 shadow-xl">
-            <h3 className="text-2xl font-semibold mb-6 text-center text-white-400">
-              Other Skills
-            </h3>
-            <ul className="flex flex-wrap justify-center gap-4">
-              <li className="bg-gray-600 rounded-full px-5 py-2 text-lg font-medium shadow-lg transition-all hover:bg-gray-500 hover:scale-105">
-                JavaScript
-              </li>
-              <li className="bg-gray-600 rounded-full px-5 py-2 text-lg font-medium shadow-lg transition-all hover:bg-gray-500 hover:scale-105">
-                Next.js
-              </li>
-              <li className="bg-gray-600 rounded-full px-5 py-2 text-lg font-medium shadow-lg transition-all hover:bg-gray-500 hover:scale-105">
-                C#
-              </li>
-              <li className="bg-gray-600 rounded-full px-5 py-2 text-lg font-medium shadow-lg transition-all hover:bg-gray-500 hover:scale-105">
-                Node.js
-              </li>
-              <li className="bg-gray-600 rounded-full px-5 py-2 text-lg font-medium shadow-lg transition-all hover:bg-gray-500 hover:scale-105">
-                Kotlin
-              </li>
-              <li className="bg-gray-600 rounded-full px-5 py-2 text-lg font-medium shadow-lg transition-all hover:bg-gray-500 hover:scale-105">
-                etc
-              </li>
-            </ul>
-          </div>
+        <motion.div variants={itemVariants} className="flex flex-wrap gap-4 justify-center">
+          <Link
+            href="/projects"
+            className="inline-flex items-center gap-2 justify-center font-semibold bg-gradient-to-r from-cyan-500 to-indigo-500 text-white rounded-full px-6 py-3 transition-all hover:scale-105 active:scale-95 duration-200 shadow-lg shadow-cyan-500/20 text-base"
+          >
+            <span>Explore Projects</span>
+            <FaArrowRight className="text-xs" />
+          </Link>
+          <Link
+            href="/services"
+            className="inline-flex items-center gap-2 justify-center font-semibold border border-white/20 hover:border-cyan-400 hover:text-cyan-400 text-gray-200 transition-all hover:scale-105 active:scale-95 duration-200 rounded-full px-6 py-3 text-base bg-white/5 hover:bg-white/10"
+          >
+            <FaCode className="text-xs" />
+            <span>View Services</span>
+          </Link>
+          <Link
+            href="/contact"
+            className="inline-flex items-center gap-2 justify-center font-semibold border border-white/20 hover:border-indigo-400 hover:text-indigo-400 text-gray-200 transition-all hover:scale-105 active:scale-95 duration-200 rounded-full px-6 py-3 text-base bg-white/5 hover:bg-white/10"
+          >
+            <FaEnvelope />
+            <span>Get in Touch</span>
+          </Link>
+        </motion.div>
+      </motion.section>
+
+      {/* Skills Section */}
+      <motion.section
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6 }}
+        id="skills"
+        className="w-full max-w-5xl mx-auto my-12 relative z-10"
+      >
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-extrabold bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent">
+            Technical Skillset
+          </h2>
+          <p className="text-gray-400 mt-2">Tools, languages, and frameworks in my sandbox</p>
         </div>
-      </section>
 
-      <section id="contact" className="w-full max-w-4xl text-center">
-        <h2 className="text-2xl font-bold mb-4"></h2>
-        <h2 className="text-2xl font-bold mb-4">Get in Touch</h2>
-        <p className="mb-4">
-          I'm always open to new opportunities and collaborations.
-        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-4">
+          <Card className="glass-panel border-white/5 shadow-xl hover:shadow-cyan-950/20 hover:border-cyan-500/30 transition-all duration-300">
+            <CardHeader className="flex gap-3 px-6 pt-6">
+              <div className="p-3 bg-cyan-500/10 text-cyan-400 rounded-xl">
+                <FaCode size={20} />
+              </div>
+              <div className="flex flex-col text-left">
+                <p className="text-lg font-bold text-white">Core Technologies</p>
+                <p className="text-xs text-gray-400">Primary programming languages</p>
+              </div>
+            </CardHeader>
+            <CardContent className="px-6 py-4 flex flex-row flex-wrap gap-2.5">
+              {topSkills.map((skill) => (
+                <Chip
+                  key={skill}
+                  variant="soft"
+                  color="accent"
+                  className="bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 hover:scale-105 hover:bg-cyan-500/20 transition-all duration-200 text-sm py-1.5 px-3"
+                >
+                  {skill}
+                </Chip>
+              ))}
+            </CardContent>
+          </Card>
 
-        <Button
-          color="primary"
-          variant="solid"
-          size="lg"
-          className="font-bold bg-[#2c3e50] hover:bg-[#34495e] transition-colors duration-300 px-8 py-4 rounded-full shadow-lg text-lg"
-          as="a"
-          href="/contact"
-        >
-          {" "}
-          ✉️ Email Me
-        </Button>
-      </section>
-      <footer className="mt-16 text-center">
-        <p>
-          © 2021 - {new Date().getFullYear()} Zviel Koren. All rights reserved.
-        </p>
+          <Card className="glass-panel border-white/5 shadow-xl hover:shadow-indigo-950/20 hover:border-indigo-500/30 transition-all duration-300">
+            <CardHeader className="flex gap-3 px-6 pt-6">
+              <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl">
+                <FaServer size={20} />
+              </div>
+              <div className="flex flex-col text-left">
+                <p className="text-lg font-bold text-white">Frameworks & Tools</p>
+                <p className="text-xs text-gray-400">Modern stack extensions</p>
+              </div>
+            </CardHeader>
+            <CardContent className="px-6 py-4 flex flex-row flex-wrap gap-2.5">
+              {otherSkills.map((skill) => (
+                <Chip
+                  key={skill}
+                  variant="soft"
+                  color="accent"
+                  className="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 hover:scale-105 hover:bg-indigo-500/20 transition-all duration-200 text-sm py-1.5 px-3"
+                >
+                  {skill}
+                </Chip>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+      </motion.section>
+
+      {/* Footer */}
+      <footer className="w-full py-8 mt-20 border-t border-white/5 relative z-10 flex flex-col items-center">
+        <LiveClock />
       </footer>
     </main>
   );

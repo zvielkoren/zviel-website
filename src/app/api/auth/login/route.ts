@@ -22,7 +22,7 @@ export async function POST(request: Request) {
         .sign(secret);
       
       // Set cookie
-      cookies().set('auth_token', token, {
+      (await cookies()).set('auth_token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
