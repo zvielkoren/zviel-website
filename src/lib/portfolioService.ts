@@ -1,4 +1,4 @@
-import { getD1Client } from "./db";
+import { getD1Client, type D1Database } from "./db";
 
 export interface Project {
   id: string;
@@ -43,7 +43,7 @@ function safeGetD1Client() {
 }
 
 // Ensure database tables exist
-async function ensureTables(client: any) {
+async function ensureTables(client: D1Database) {
   try {
     await client.prepare(`
       CREATE TABLE IF NOT EXISTS portfolio_projects (
@@ -155,7 +155,7 @@ export async function getOrganizations(): Promise<Organization[]> {
   if (client) {
     await ensureTables(client);
     try {
-      const { results } = await client.prepare("SELECT * FROM portfolio_organizations").all();
+      const { results } = await client.prepare("SELECT * FROM portfolio_organizations").all<Organization>();
       return results;
     } catch (e) {
       console.error("D1 getOrganizations error:", e);
