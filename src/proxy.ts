@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const isLoggedIn = request.cookies.get('auth_token');
   
   if (request.nextUrl.pathname.startsWith('/dashboard')) {
@@ -12,3 +12,7 @@ export function middleware(request: NextRequest) {
 
   return NextResponse.next();
 }
+
+// Legacy alias — @cloudflare/next-on-pages still looks for "middleware"
+export const middleware = proxy;
+
