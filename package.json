@@ -55,5 +55,12 @@
   "browser": {
     "crypto": false,
     "stream": false
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp",
+      "workerd"
+    ]
   }
 }
