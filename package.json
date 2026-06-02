@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "pages:build": "opennextjs-cloudflare build && mv .open-next/worker.js .open-next/_worker.js && node scripts/patch-worker.js",
+    "pages:build": "opennextjs-cloudflare build && mv .open-next/worker.js .open-next/assets/_worker.js && node scripts/patch-worker.js",
     "start": "next start",
     "lint": "eslint .",
     "preview": "opennextjs-cloudflare preview",
