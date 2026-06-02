@@ -1,23 +1,9 @@
 import { NextResponse } from "next/server";
 import { Octokit } from "@octokit/rest";
 import { getOrganizations, addOrganization, deleteOrganization } from "@/lib/portfolioService";
+import { getEnvVar } from "@/utils/env";
 
 export const runtime = "edge";
-
-const FALLBACK_ORGANIZATIONS = [
-  {
-    name: "DevSphere Collective",
-    mission: "An open-source collective developing high-performance developer tools, stateful agentic workflows, and type-safe systems.",
-    link: "https://github.com/zvielkoren",
-    logo: "https://avatars.githubusercontent.com/u/132788625?v=4"
-  },
-  {
-    name: "CloudForge Labs",
-    mission: "A cooperative lab prototyping serverless architectures, custom edge runtimes, and real-time distributed state synchronizations.",
-    link: "https://github.com/zvielkoren",
-    logo: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=60"
-  }
-];
 
 export async function GET() {
   console.log("Organization API: GET request received");
@@ -31,10 +17,11 @@ export async function GET() {
     }
 
     // 2. If no saved organizations, check if we can fetch from GitHub
-    if (!process.env.GITHUB_TOKEN) {
-      console.warn("Organization API: GITHUB_TOKEN is not configured, returning mock fallback data.");
+    const githubToken = getEnvVar("GITHUB_TOKEN");
+    if (!githubToken) {
+      console.warn("Organization API: GITHUB_TOKEN is not configured.");
       return NextResponse.json(
-        FALLBACK_ORGANIZATIONS,
+        [],
         {
           status: 200,
           headers: {
@@ -45,7 +32,7 @@ export async function GET() {
     }
 
     const octokit = new Octokit({
-      auth: process.env.GITHUB_TOKEN,
+      auth: githubToken,
     });
 
     console.log("Organization API: Fetching orgs for user zvielkoren");
@@ -57,7 +44,7 @@ export async function GET() {
     const organizations = response.data.map((org) => ({
       name: org.login,
       mission: org.description || "",
-      link: org.url || `https://github.com/${org.login}`,
+      link: `https://github.com/${org.login}`,
       logo: org.avatar_url || "",
     }));
 

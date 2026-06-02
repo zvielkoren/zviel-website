@@ -583,8 +583,27 @@ export default function DashboardPage() {
                         className="flex items-center justify-between p-4 bg-[#080e1b]/60 border border-white/5 rounded-xl hover:border-indigo-500/30 transition-all duration-300 group"
                       >
                         <div className="flex items-center gap-4 pr-4">
-                          <div className="w-10 h-10 rounded-full border border-indigo-500/30 p-[2px] overflow-hidden bg-white/5 flex-shrink-0">
-                            <img src={org.logo} alt={org.name} className="w-full h-full object-cover rounded-full" />
+                          <div className="w-10 h-10 rounded-full border border-indigo-500/30 p-[2px] overflow-hidden bg-white/5 flex-shrink-0 flex items-center justify-center relative">
+                            {org.logo ? (
+                              <img
+                                src={org.logo}
+                                alt={org.name}
+                                className="w-full h-full object-cover rounded-full"
+                                onError={(e) => {
+                                  (e.currentTarget as HTMLImageElement).style.display = "none";
+                                  const sibling = (e.currentTarget as HTMLImageElement).nextElementSibling;
+                                  if (sibling) {
+                                    (sibling as HTMLElement).style.display = "flex";
+                                  }
+                                }}
+                              />
+                            ) : null}
+                            <div
+                              className="w-full h-full flex items-center justify-center text-indigo-400"
+                              style={{ display: org.logo ? "none" : "flex" }}
+                            >
+                              <FaBuilding size={16} />
+                            </div>
                           </div>
                           <div className="flex flex-col gap-0.5">
                             <h3 className="font-bold text-white group-hover:text-indigo-400 transition-colors">

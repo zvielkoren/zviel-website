@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Octokit } from "@octokit/rest";
 import { getProjects, addProject, deleteProject } from "@/lib/portfolioService";
+import { getEnvVar } from "@/utils/env";
 
 export const runtime = 'edge';
 
@@ -16,45 +17,6 @@ interface GitHubRepository {
   private: boolean;
 }
 
-const FALLBACK_PROJECTS = [
-  {
-    id: "fallback-1",
-    name: "zviel-website",
-    description: "Personal portfolio and developer platform built with Next.js, HeroUI, Tailwind CSS v4, and dynamic Cloudflare Edge workers API integration.",
-    githubLink: "https://github.com/zvielkoren/zviel-website",
-    owner: "132788625",
-    ownerName: "zvielkoren",
-    stars: 8,
-    language: "TypeScript",
-    updatedAt: new Date().toISOString(),
-    private: false
-  },
-  {
-    id: "fallback-2",
-    name: "rusty-compiler",
-    description: "An experimental ahead-of-time micro-compiler engineered in Rust, compiling a custom subset of typed syntax directly into optimized x86 assembly.",
-    githubLink: "https://github.com/zvielkoren/rusty-compiler",
-    owner: "132788625",
-    ownerName: "zvielkoren",
-    stars: 14,
-    language: "Rust",
-    updatedAt: new Date().toISOString(),
-    private: false
-  },
-  {
-    id: "fallback-3",
-    name: "ai-agent-sdk",
-    description: "An autonomous agent orchestration SDK for running stateful, tool-enabled AI workflows locally with strict JSON schema outputs and visual debugger UI.",
-    githubLink: "https://github.com/zvielkoren/ai-agent-sdk",
-    owner: "132788625",
-    ownerName: "zvielkoren",
-    stars: 22,
-    language: "Python",
-    updatedAt: new Date().toISOString(),
-    private: false
-  }
-];
-
 export async function GET() {
   console.log("Projects API: GET request received");
   
@@ -67,10 +29,11 @@ export async function GET() {
     }
 
     // 2. If no saved projects, check if we can fetch from GitHub
-    if (!process.env.GITHUB_TOKEN) {
-      console.warn("Projects API: GITHUB_TOKEN is not configured, returning mock fallback data.");
+    const githubToken = getEnvVar("GITHUB_TOKEN");
+    if (!githubToken) {
+      console.warn("Projects API: GITHUB_TOKEN is not configured.");
       return NextResponse.json(
-        FALLBACK_PROJECTS,
+        [],
         {
           status: 200,
           headers: {
@@ -81,7 +44,7 @@ export async function GET() {
     }
 
     const octokit = new Octokit({
-      auth: process.env.GITHUB_TOKEN,
+      auth: githubToken,
     });
 
     const userIds = ["132788625"]; // Specific GitHub user IDs

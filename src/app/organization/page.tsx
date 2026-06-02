@@ -21,21 +21,6 @@ interface Organization {
   logo: string;
 }
 
-const FALLBACK_ORGANIZATIONS: Organization[] = [
-  {
-    name: "DevSphere Collective",
-    mission: "An open-source collective developing high-performance developer tools, stateful agentic workflows, and type-safe systems.",
-    link: "https://github.com/zvielkoren",
-    logo: "https://avatars.githubusercontent.com/u/132788625?v=4"
-  },
-  {
-    name: "CloudForge Labs",
-    mission: "A cooperative lab prototyping serverless architectures, custom edge runtimes, and real-time distributed state synchronizations.",
-    link: "https://github.com/zvielkoren",
-    logo: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=60"
-  }
-];
-
 const OrganizationPage = () => {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,8 +42,8 @@ const OrganizationPage = () => {
         setIsOfflineSnapshot(isOffline);
         setError(null);
       } catch (err) {
-        console.warn("GitHub API token unconfigured or rate limited. Loading cached local snapshots instead.", err);
-        setOrganizations(FALLBACK_ORGANIZATIONS);
+        console.warn("GitHub API token unconfigured or rate limited.", err);
+        setOrganizations([]);
         setIsOfflineSnapshot(true);
         setError(null);
       } finally {
@@ -128,12 +113,27 @@ const OrganizationPage = () => {
                 className="glass-panel border-white/5 hover:border-cyan-500/30 hover:shadow-xl hover:shadow-cyan-950/20 transition-all duration-300 w-full h-[280px] flex flex-col justify-between text-left group"
               >
                 <CardHeader className="flex gap-4 p-6 items-center">
-                  <div className="w-12 h-12 rounded-full border-2 border-indigo-500/40 p-[2px] flex-shrink-0 overflow-hidden bg-white/5">
-                    <img
-                      src={org.logo}
-                      alt={`${org.name} logo`}
-                      className="w-full h-full object-cover rounded-full"
-                    />
+                  <div className="w-12 h-12 rounded-full border-2 border-indigo-500/40 p-[2px] flex-shrink-0 overflow-hidden bg-white/5 flex items-center justify-center relative">
+                    {org.logo ? (
+                      <img
+                        src={org.logo}
+                        alt={`${org.name} logo`}
+                        className="w-full h-full object-cover rounded-full"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).style.display = "none";
+                          const sibling = (e.currentTarget as HTMLImageElement).nextElementSibling;
+                          if (sibling) {
+                            (sibling as HTMLElement).style.display = "flex";
+                          }
+                        }}
+                      />
+                    ) : null}
+                    <div
+                      className="w-full h-full flex items-center justify-center text-indigo-400"
+                      style={{ display: org.logo ? "none" : "flex" }}
+                    >
+                      <FaBuilding size={20} />
+                    </div>
                   </div>
                   <div className="flex flex-col text-left">
                     <h2 className="text-xl font-bold text-white group-hover:text-cyan-400 transition-colors">
@@ -195,12 +195,27 @@ const OrganizationPage = () => {
               </button>
 
               <div className="flex gap-4 p-6 items-center border-b border-white/5">
-                <div className="w-12 h-12 rounded-full border-2 border-indigo-500/40 p-[2px] flex-shrink-0 overflow-hidden bg-white/5">
-                  <img
-                    src={selectedOrganization.logo}
-                    alt={selectedOrganization.name}
-                    className="w-full h-full object-cover rounded-full"
-                  />
+                <div className="w-12 h-12 rounded-full border-2 border-indigo-500/40 p-[2px] flex-shrink-0 overflow-hidden bg-white/5 flex items-center justify-center relative">
+                  {selectedOrganization.logo ? (
+                    <img
+                      src={selectedOrganization.logo}
+                      alt={selectedOrganization.name}
+                      className="w-full h-full object-cover rounded-full"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.display = "none";
+                        const sibling = (e.currentTarget as HTMLImageElement).nextElementSibling;
+                        if (sibling) {
+                          (sibling as HTMLElement).style.display = "flex";
+                        }
+                      }}
+                    />
+                  ) : null}
+                  <div
+                    className="w-full h-full flex items-center justify-center text-indigo-400"
+                    style={{ display: selectedOrganization.logo ? "none" : "flex" }}
+                  >
+                    <FaBuilding size={20} />
+                  </div>
                 </div>
                 <div className="flex flex-col text-left">
                   <h2 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent">

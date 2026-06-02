@@ -1,21 +1,25 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import * as jose from 'jose';
+import { getEnvVar } from '@/utils/env';
 
 // Add Edge Runtime configuration
 export const runtime = 'edge';
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; // Use environment variable in production
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { username, password } = body;
 
+    const jwtSecret = getEnvVar('JWT_SECRET') || 'your-secret-key';
+    const adminUsername = getEnvVar('ADMIN_USERNAME');
+    const adminPassword = getEnvVar('ADMIN_PASSWORD');
+
     // In a real application, you would verify against a database
     // This is just a simple example - replace with your actual authentication logic
-    if (username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD) {
+    if (username && username === adminUsername && password && password === adminPassword) {
       // Create JWT token using jose
-      const secret = new TextEncoder().encode(JWT_SECRET);
+      const secret = new TextEncoder().encode(jwtSecret);
       const token = await new jose.SignJWT({ username })
         .setProtectedHeader({ alg: 'HS256' })
         .setExpirationTime('1h')
@@ -24,7 +28,7 @@ export async function POST(request: Request) {
       // Set cookie
       (await cookies()).set('auth_token', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: getEnvVar('NODE_ENV') === 'production',
         sameSite: 'strict',
         maxAge: 3600 // 1 hour
       });
