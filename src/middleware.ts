@@ -13,7 +13,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
 }
 
-// Next.js expects runtime and matcher definitions to be properties of a 'config' object
 export const config = {
-    runtime: 'edge',
+    runtime: 'experimental-edge',
 };
