@@ -88,3 +88,4 @@ export async function deleteOrganization(name: string): Promise<boolean> {
   globalThis.__mockOrganizations = globalThis.__mockOrganizations!.filter(o => o.name.toLowerCase() !== name.toLowerCase());
   return globalThis.__mockOrganizations.length < lenBefore;
 }
+
