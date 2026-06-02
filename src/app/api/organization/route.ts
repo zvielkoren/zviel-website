@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { Octokit } from "@octokit/rest";
 import { getOrganizations, addOrganization, deleteOrganization } from "@/lib/portfolioService";
 import { getEnvVar } from "@/utils/env";
 
@@ -31,17 +30,23 @@ export async function GET() {
       );
     }
 
-    const octokit = new Octokit({
-      auth: githubToken,
-    });
-
     console.log("Organization API: Fetching orgs for user zvielkoren");
-    const response = await octokit.orgs.listForUser({
-      username: "zvielkoren",
+    const response = await fetch(`https://api.github.com/users/zvielkoren/orgs`, {
+      headers: {
+        Authorization: `token ${githubToken}`,
+        'User-Agent': 'zviel-website',
+        Accept: 'application/vnd.github.v3+json',
+      }
     });
 
-    console.log(`Organization API: Found ${response.data.length} organizations`);
-    const organizations = response.data.map((org) => ({
+    if (!response.ok) {
+      throw new Error(`GitHub API returned status ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(`Organization API: Found ${data.length} organizations`);
+    
+    const organizations = data.map((org: any) => ({
       name: org.login,
       mission: org.description || "",
       link: `https://github.com/${org.login}`,

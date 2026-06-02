@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllDemos, createDemo, deleteDemo } from '@/lib/demoService';
 import JSZip from 'jszip';
-import { getD1Client } from '@/lib/db';
+// D1 client import removed; not used in Edge runtime
 
 export const runtime = 'edge';
 
@@ -141,11 +141,8 @@ export async function DELETE(request: NextRequest) {
 
 // Helper function to store files in D1
 async function storeFile(filePath: string, buffer: Buffer) {
-  const client = await getD1Client();
-  console.log('Storing file:', filePath); // Log the file path
-  // Assuming you have a table named 'Files' with columns 'path' and 'content'
-  const result = await client.prepare(
-    'INSERT INTO Files (path, content) VALUES (?, ?)'
-  ).bind(filePath, buffer).run();
-  console.log('Store file result:', result); // Log the result
+  // Mock file storage: log path and size
+  console.log(`Mock storing file ${filePath}, size ${buffer.length} bytes`);
+  // No actual storage performed
+  return { success: true } as any;
 }

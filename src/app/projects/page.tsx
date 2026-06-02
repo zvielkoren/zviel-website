@@ -29,45 +29,6 @@ interface Project {
   private: boolean;
 }
 
-const FALLBACK_PROJECTS: Project[] = [
-  {
-    id: "fallback-1",
-    name: "zviel-website",
-    description: "Personal portfolio and developer platform built with Next.js, HeroUI, Tailwind CSS v4, and dynamic Cloudflare Edge workers API integration.",
-    githubLink: "https://github.com/zvielkoren/zviel-website",
-    owner: "132788625",
-    ownerName: "zvielkoren",
-    stars: 8,
-    language: "TypeScript",
-    updatedAt: new Date().toISOString(),
-    private: false
-  },
-  {
-    id: "fallback-2",
-    name: "rusty-compiler",
-    description: "An experimental ahead-of-time micro-compiler engineered in Rust, compiling a custom subset of typed syntax directly into optimized x86 assembly.",
-    githubLink: "https://github.com/zvielkoren/rusty-compiler",
-    owner: "132788625",
-    ownerName: "zvielkoren",
-    stars: 14,
-    language: "Rust",
-    updatedAt: new Date().toISOString(),
-    private: false
-  },
-  {
-    id: "fallback-3",
-    name: "ai-agent-sdk",
-    description: "An autonomous agent orchestration SDK for running stateful, tool-enabled AI workflows locally with strict JSON schema outputs and visual debugger UI.",
-    githubLink: "https://github.com/zvielkoren/ai-agent-sdk",
-    owner: "132788625",
-    ownerName: "zvielkoren",
-    stars: 22,
-    language: "Python",
-    updatedAt: new Date().toISOString(),
-    private: false
-  }
-];
-
 const ProjectsPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,8 +52,8 @@ const ProjectsPage = () => {
       setIsOfflineSnapshot(isOffline);
       setError(null);
     } catch (error) {
-      console.warn("GitHub API token unconfigured or rate limited. Loading cached local snapshots instead.", error);
-      setProjects(FALLBACK_PROJECTS);
+      console.warn("GitHub API token unconfigured or rate limited.", error);
+      setProjects([]);
       setIsOfflineSnapshot(true);
       setError(null); // Clear error to allow rendering the fallback UI gracefully
     } finally {

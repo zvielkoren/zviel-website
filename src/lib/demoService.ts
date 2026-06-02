@@ -1,4 +1,4 @@
-import path from 'path';
+// import path from 'path'; // Removed for Edge runtime compatibility
 import { v4 as uuidv4 } from 'uuid';
 
 export interface Demo {

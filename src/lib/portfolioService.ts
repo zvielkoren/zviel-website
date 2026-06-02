@@ -1,4 +1,4 @@
-import { getD1Client, type D1Database } from "./db";
+// D1 database functionality removed for Edge compatibility
 
 export interface Project {
   id: string;
@@ -34,59 +34,13 @@ if (!globalThis.__mockOrganizations) {
 }
 
 // Safely obtain the D1 client or return null
-function safeGetD1Client() {
-  try {
-    return getD1Client();
-  } catch (e) {
-    return null;
-  }
-}
+// D1 client helpers removed; using only in-memory mock data
 
 // Ensure database tables exist
-async function ensureTables(client: D1Database) {
-  try {
-    await client.prepare(`
-      CREATE TABLE IF NOT EXISTS portfolio_projects (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        description TEXT,
-        githubLink TEXT,
-        owner TEXT,
-        ownerName TEXT,
-        stars INTEGER DEFAULT 0,
-        language TEXT,
-        updatedAt TEXT,
-        private INTEGER DEFAULT 0
-      )
-    `).run();
-
-    await client.prepare(`
-      CREATE TABLE IF NOT EXISTS portfolio_organizations (
-        name TEXT PRIMARY KEY,
-        mission TEXT,
-        link TEXT,
-        logo TEXT
-      )
-    `).run();
-  } catch (e) {
-    console.error("Failed to ensure D1 tables exist:", e);
-  }
-}
+// Table creation not needed for mock data
 
 export async function getProjects(): Promise<Project[]> {
-  const client = safeGetD1Client();
-  if (client) {
-    await ensureTables(client);
-    try {
-      const { results } = await client.prepare("SELECT * FROM portfolio_projects").all();
-      return results.map((row: any) => ({
-        ...row,
-        private: Boolean(row.private)
-      }));
-    } catch (e) {
-      console.error("D1 getProjects error:", e);
-    }
-  }
+  // Return mock projects only; D1 not used in Edge runtime
   return globalThis.__mockProjects || [];
 }
 
@@ -95,33 +49,7 @@ export async function addProject(project: Omit<Project, "updatedAt">): Promise<P
     ...project,
     updatedAt: new Date().toISOString()
   };
-
-  const client = safeGetD1Client();
-  if (client) {
-    await ensureTables(client);
-    try {
-      await client.prepare(`
-        INSERT OR REPLACE INTO portfolio_projects (id, name, description, githubLink, owner, ownerName, stars, language, updatedAt, private)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).bind(
-        newProject.id,
-        newProject.name,
-        newProject.description,
-        newProject.githubLink,
-        newProject.owner,
-        newProject.ownerName,
-        newProject.stars,
-        newProject.language,
-        newProject.updatedAt,
-        newProject.private ? 1 : 0
-      ).run();
-      return newProject;
-    } catch (e) {
-      console.error("D1 addProject error:", e);
-    }
-  }
-
-  // Fallback
+  // Store in mock array only
   const index = globalThis.__mockProjects!.findIndex(p => p.id === newProject.id);
   if (index >= 0) {
     globalThis.__mockProjects![index] = newProject;
@@ -132,54 +60,19 @@ export async function addProject(project: Omit<Project, "updatedAt">): Promise<P
 }
 
 export async function deleteProject(id: string): Promise<boolean> {
-  const client = safeGetD1Client();
-  if (client) {
-    await ensureTables(client);
-    try {
-      await client.prepare("DELETE FROM portfolio_projects WHERE id = ?").bind(id).run();
-      return true;
-    } catch (e) {
-      console.error("D1 deleteProject error:", e);
-      return false;
-    }
-  }
-
-  // Fallback
+  // Remove from mock array only
   const lenBefore = globalThis.__mockProjects!.length;
   globalThis.__mockProjects = globalThis.__mockProjects!.filter(p => p.id !== id);
   return globalThis.__mockProjects.length < lenBefore;
 }
 
 export async function getOrganizations(): Promise<Organization[]> {
-  const client = safeGetD1Client();
-  if (client) {
-    await ensureTables(client);
-    try {
-      const { results } = await client.prepare("SELECT * FROM portfolio_organizations").all<Organization>();
-      return results;
-    } catch (e) {
-      console.error("D1 getOrganizations error:", e);
-    }
-  }
+  // Return mock organizations only; D1 not used
   return globalThis.__mockOrganizations || [];
 }
 
 export async function addOrganization(org: Organization): Promise<Organization> {
-  const client = safeGetD1Client();
-  if (client) {
-    await ensureTables(client);
-    try {
-      await client.prepare(`
-        INSERT OR REPLACE INTO portfolio_organizations (name, mission, link, logo)
-        VALUES (?, ?, ?, ?)
-      `).bind(org.name, org.mission, org.link, org.logo).run();
-      return org;
-    } catch (e) {
-      console.error("D1 addOrganization error:", e);
-    }
-  }
-
-  // Fallback
+  // Store in mock array only
   const index = globalThis.__mockOrganizations!.findIndex(o => o.name.toLowerCase() === org.name.toLowerCase());
   if (index >= 0) {
     globalThis.__mockOrganizations![index] = org;
@@ -190,19 +83,7 @@ export async function addOrganization(org: Organization): Promise<Organization> 
 }
 
 export async function deleteOrganization(name: string): Promise<boolean> {
-  const client = safeGetD1Client();
-  if (client) {
-    await ensureTables(client);
-    try {
-      await client.prepare("DELETE FROM portfolio_organizations WHERE name = ?").bind(name).run();
-      return true;
-    } catch (e) {
-      console.error("D1 deleteOrganization error:", e);
-      return false;
-    }
-  }
-
-  // Fallback
+  // Remove from mock array only
   const lenBefore = globalThis.__mockOrganizations!.length;
   globalThis.__mockOrganizations = globalThis.__mockOrganizations!.filter(o => o.name.toLowerCase() !== name.toLowerCase());
   return globalThis.__mockOrganizations.length < lenBefore;

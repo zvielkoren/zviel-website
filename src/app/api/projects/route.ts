@@ -1,21 +1,8 @@
 import { NextResponse } from "next/server";
-import { Octokit } from "@octokit/rest";
 import { getProjects, addProject, deleteProject } from "@/lib/portfolioService";
 import { getEnvVar } from "@/utils/env";
 
 export const runtime = 'edge';
-
-interface GitHubRepository {
-  owner: any;
-  id: number;
-  name: string;
-  description: string | null;
-  html_url: string;
-  stargazers_count: number;
-  language: string | null;
-  updated_at: string;
-  private: boolean;
-}
 
 export async function GET() {
   console.log("Projects API: GET request received");
@@ -43,26 +30,28 @@ export async function GET() {
       );
     }
 
-    const octokit = new Octokit({
-      auth: githubToken,
-    });
-
     const userIds = ["132788625"]; // Specific GitHub user IDs
     const fetchedProjects = [];
 
     for (const id of userIds) {
       console.log(`Projects API: Fetching repos for user ID ${id}`);
       try {
-        const response = await octokit.request(`GET /user/${id}/repos`, {
-          per_page: 100,
-          sort: "updated",
-          direction: "desc",
-          type: "all",
+        const response = await fetch(`https://api.github.com/user/${id}/repos?per_page=100&sort=updated&direction=desc&type=all`, {
+          headers: {
+            Authorization: `token ${githubToken}`,
+            'User-Agent': 'zviel-website',
+            Accept: 'application/vnd.github.v3+json',
+          }
         });
-        
-        console.log(`Projects API: Found ${response.data.length} repos for user ${id}`);
 
-        const userProjects = response.data.map((repo: GitHubRepository) => ({
+        if (!response.ok) {
+          throw new Error(`GitHub API returned status ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log(`Projects API: Found ${data.length} repos for user ${id}`);
+
+        const userProjects = data.map((repo: any) => ({
           id: repo.id.toString(),
           name: repo.name,
           description: repo.description || "",
