@@ -48,7 +48,8 @@
     "eslint": "^9.x",
     "postcss": "^8.5.14",
     "tailwindcss": "4",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "wrangler": "^4.90.0"
   },
   "browser": {
     "crypto": false,
