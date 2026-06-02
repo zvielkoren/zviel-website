@@ -9,7 +9,8 @@
     "pages:build": "opennextjs-cloudflare build",
     "start": "next start",
     "lint": "eslint .",
-    "preview": "opennextjs-cloudflare preview"
+    "preview": "opennextjs-cloudflare preview",
+    "wrangler": "echo"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
