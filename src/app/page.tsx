@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, Variants } from "framer-motion";
@@ -28,8 +28,23 @@ export default function Home() {
     },
   };
 
-  const topSkills = ["TypeScript", "Java", "Python", "SQL", "Rust"];
-  const otherSkills = ["JavaScript", "Next.js", "C#", "Node.js", "Kotlin", "React", "Docker", "Git"];
+  const [topSkills, setTopSkills] = useState<string[]>(["TypeScript", "Java", "Python", "SQL", "Rust"]);
+  const [otherSkills, setOtherSkills] = useState<string[]>(["JavaScript", "Next.js", "C#", "Node.js", "Kotlin", "React", "Docker", "Git"]);
+
+  useEffect(() => {
+    fetch("/api/languages")
+      .then(res => res.json())
+      .then((data: any[]) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const core = data.filter(l => l.type === "core").map(l => l.name);
+          const other = data.filter(l => l.type === "other").map(l => l.name);
+          setTopSkills(core);
+          setOtherSkills(other);
+        }
+      })
+      .catch(err => console.error("Failed to fetch languages:", err));
+  }, []);
+
 
   return (
     <main className="relative min-h-screen overflow-hidden py-16 px-4 md:px-8 max-w-7xl mx-auto flex flex-col justify-between z-10">

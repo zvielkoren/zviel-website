@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -23,7 +23,9 @@ import {
 } from "@heroui/react";
 
 interface ServiceItem {
-  icon: React.ReactNode;
+  id?: string;
+  icon?: React.ReactNode;
+  iconName?: string;
   title: string;
   category: string;
   description: string;
@@ -41,38 +43,53 @@ interface TierItem {
   ctaText: string;
 }
 
-const SERVICES: ServiceItem[] = [
+const getIcon = (name: string) => {
+  switch (name) {
+    case "FaCode":
+      return <FaCode size={24} />;
+    case "FaServer":
+      return <FaServer size={24} />;
+    case "FaBrain":
+      return <FaBrain size={24} />;
+    case "FaWrench":
+      return <FaWrench size={24} />;
+    default:
+      return <FaCode size={24} />;
+  }
+};
+
+const INITIAL_SERVICES: ServiceItem[] = [
   {
-    icon: <FaCode size={24} />,
     title: "Full-Stack Web Applications",
     category: "Frontend & Logic",
     description: "Engineering beautiful, highly responsive frontend interfaces backed by fast logical layers. Designed with type-safety and modern performance patterns.",
     techs: ["Next.js", "React", "TypeScript", "Tailwind CSS v4", "HeroUI"],
-    colorClass: "from-cyan-400 to-teal-400 text-cyan-400"
+    colorClass: "from-cyan-400 to-teal-400 text-cyan-400",
+    iconName: "FaCode"
   },
   {
-    icon: <FaServer size={24} />,
     title: "Backend & Cloud Architecture",
     category: "Infrastructure & APIs",
     description: "Designing robust, highly concurrent backend systems, microservices, and database schemas. Optimized for rapid scaling and serverless edge runtimes.",
     techs: ["Node.js", "Rust", "Python", "SQL / NoSQL", "Docker", "Serverless Edge"],
-    colorClass: "from-indigo-400 to-cyan-400 text-indigo-400"
+    colorClass: "from-indigo-400 to-cyan-400 text-indigo-400",
+    iconName: "FaServer"
   },
   {
-    icon: <FaBrain size={24} />,
     title: "AI & Agentic Orchestration",
     category: "Intelligence & Automations",
     description: "Integrating intelligent LLM functions into modern business logic. Constructing stateful, tool-enabled autonomous agents and scalable pipelines.",
     techs: ["Gemini API", "LangChain", "Autonomous Workflows", "Structured JSON Outputs"],
-    colorClass: "from-purple-400 to-indigo-400 text-purple-400"
+    colorClass: "from-purple-400 to-indigo-400 text-purple-400",
+    iconName: "FaBrain"
   },
   {
-    icon: <FaWrench size={24} />,
     title: "Developer Tooling & Systems",
     category: "Performance & DX",
     description: "Creating premium developer tools, hand-written compiler pipelines, performance-tuned CLI engines, and isolated helper scripts to optimize team productivity.",
     techs: ["Rust", "Python", "Compiler Design", "Bash scripting", "Automation"],
-    colorClass: "from-teal-400 to-purple-400 text-teal-400"
+    colorClass: "from-teal-400 to-purple-400 text-teal-400",
+    iconName: "FaWrench"
   }
 ];
 
@@ -122,6 +139,23 @@ const TIERS: TierItem[] = [
 ];
 
 export default function ServicesPage() {
+  const [services, setServices] = useState<ServiceItem[]>(
+    INITIAL_SERVICES.map(s => ({ ...s, icon: getIcon(s.iconName || "FaCode") }))
+  );
+
+  useEffect(() => {
+    fetch("/api/services")
+      .then(res => res.json())
+      .then((data: any[]) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setServices(data.map(item => ({
+            ...item,
+            icon: getIcon(item.iconName || "FaCode")
+          })));
+        }
+      })
+      .catch(err => console.error("Failed to fetch dynamic services:", err));
+  }, []);
   return (
     <div className="relative min-h-screen py-16 px-4 md:px-8 max-w-7xl mx-auto z-10">
       {/* Decorative background gradients */}
@@ -156,7 +190,7 @@ export default function ServicesPage() {
       {/* Services Grid */}
       <section className="my-16 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {SERVICES.map((service, index) => (
+          {services.map((service, index) => (
             <motion.div
               key={service.title}
               initial={{ opacity: 0, y: 30 }}

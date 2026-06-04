@@ -12,7 +12,9 @@ import {
   FaCheckCircle,
   FaExclamationTriangle,
   FaLink,
-  FaStar
+  FaStar,
+  FaBrain,
+  FaWrench
 } from "react-icons/fa";
 import Loading from "@/components/Loading";
 import ErrorMessage from "@/components/ErrorMessage";
@@ -55,7 +57,23 @@ interface Organization {
   logo: string;
 }
 
-type TabType = "demos" | "projects" | "organizations";
+interface Language {
+  id: string;
+  name: string;
+  type: "core" | "other";
+}
+
+interface ServiceItem {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  techs: string[];
+  iconName: string;
+  colorClass: string;
+}
+
+type TabType = "demos" | "projects" | "organizations" | "languages" | "services";
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<TabType>("projects");
@@ -95,15 +113,35 @@ export default function DashboardPage() {
     logo: ""
   });
 
+  // Languages State
+  const [languages, setLanguages] = useState<Language[]>([]);
+  const [langFormData, setLangFormData] = useState({
+    name: "",
+    type: "core" as "core" | "other"
+  });
+
+  // Services State
+  const [services, setServices] = useState<ServiceItem[]>([]);
+  const [serviceFormData, setServiceFormData] = useState({
+    title: "",
+    category: "",
+    description: "",
+    techs: "",
+    iconName: "FaCode",
+    colorClass: "from-cyan-400 to-teal-400 text-cyan-400"
+  });
+
   // Fetch initial data
   const fetchData = async () => {
     try {
       setLoading(true);
       
-      const [demosRes, projectsRes, orgsRes] = await Promise.all([
+      const [demosRes, projectsRes, orgsRes, langsRes, servicesRes] = await Promise.all([
         fetch("/api/demos").catch(() => null),
         fetch("/api/projects").catch(() => null),
-        fetch("/api/organization").catch(() => null)
+        fetch("/api/organization").catch(() => null),
+        fetch("/api/languages").catch(() => null),
+        fetch("/api/services").catch(() => null)
       ]);
 
       if (demosRes && demosRes.ok) {
@@ -117,6 +155,14 @@ export default function DashboardPage() {
       if (orgsRes && orgsRes.ok) {
         const data = await orgsRes.json();
         setOrganizations(data || []);
+      }
+      if (langsRes && langsRes.ok) {
+        const data = await langsRes.json();
+        setLanguages(data || []);
+      }
+      if (servicesRes && servicesRes.ok) {
+        const data = await servicesRes.json();
+        setServices(data || []);
       }
 
       setStatusMessage(null);
@@ -274,6 +320,90 @@ export default function DashboardPage() {
     }
   };
 
+  const handleLanguageSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("/api/languages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: langFormData.name,
+          type: langFormData.type
+        })
+      });
+
+      if (!response.ok) throw new Error("Failed to add language");
+
+      triggerNotification("Language added successfully!");
+      setLangFormData({
+        name: "",
+        type: "core"
+      });
+      fetchData();
+    } catch (err: any) {
+      triggerNotification(err.message || "Failed to add language", true);
+    }
+  };
+
+  const handleLanguageDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this language/skill?")) return;
+    try {
+      const response = await fetch(`/api/languages?id=${id}`, { method: "DELETE" });
+      if (!response.ok) throw new Error("Failed to delete language");
+
+      triggerNotification("Language deleted successfully.");
+      fetchData();
+    } catch (err: any) {
+      triggerNotification(err.message || "Failed to delete language", true);
+    }
+  };
+
+  const handleServiceSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("/api/services", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: serviceFormData.title,
+          category: serviceFormData.category,
+          description: serviceFormData.description,
+          techs: serviceFormData.techs.split(",").map(t => t.trim()).filter(Boolean),
+          iconName: serviceFormData.iconName,
+          colorClass: serviceFormData.colorClass
+        })
+      });
+
+      if (!response.ok) throw new Error("Failed to add service");
+
+      triggerNotification("Service added successfully!");
+      setServiceFormData({
+        title: "",
+        category: "",
+        description: "",
+        techs: "",
+        iconName: "FaCode",
+        colorClass: "from-cyan-400 to-teal-400 text-cyan-400"
+      });
+      fetchData();
+    } catch (err: any) {
+      triggerNotification(err.message || "Failed to add service", true);
+    }
+  };
+
+  const handleServiceDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this service?")) return;
+    try {
+      const response = await fetch(`/api/services?id=${id}`, { method: "DELETE" });
+      if (!response.ok) throw new Error("Failed to delete service");
+
+      triggerNotification("Service deleted successfully.");
+      fetchData();
+    } catch (err: any) {
+      triggerNotification(err.message || "Failed to delete service", true);
+    }
+  };
+
   if (loading) return <Loading />;
 
   return (
@@ -312,8 +442,8 @@ export default function DashboardPage() {
       </AnimatePresence>
 
       {/* Tabs Navigation */}
-      <div className="flex gap-2 p-1.5 glass-panel border border-white/5 rounded-2xl max-w-lg mx-auto mb-12 relative z-10 bg-white/5">
-        {(["projects", "organizations", "demos"] as TabType[]).map((tab) => (
+      <div className="flex gap-2 p-1.5 glass-panel border border-white/5 rounded-2xl max-w-3xl mx-auto mb-12 relative z-10 bg-white/5">
+        {(["projects", "organizations", "demos", "languages", "services"] as TabType[]).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -326,6 +456,8 @@ export default function DashboardPage() {
             {tab === "projects" && <FaCode size={14} />}
             {tab === "organizations" && <FaBuilding size={14} />}
             {tab === "demos" && <FaServer size={14} />}
+            {tab === "languages" && <FaBrain size={14} />}
+            {tab === "services" && <FaWrench size={14} />}
             <span>{tab}</span>
           </button>
         ))}
@@ -789,6 +921,269 @@ export default function DashboardPage() {
                           onClick={() => handleDemoDelete(demo.id)}
                           className="p-2.5 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white rounded-xl transition-all duration-200 flex-shrink-0 cursor-pointer"
                           aria-label="Delete Demo"
+                        >
+                          <FaTrash size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* --- TAB 4: MANAGE LANGUAGES & SKILLS --- */}
+        {activeTab === "languages" && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+          >
+            {/* Form Column */}
+            <div className="lg:col-span-1 glass-panel border border-white/5 rounded-2xl p-6 bg-white/5 text-left h-fit">
+              <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                <FaPlus className="text-cyan-400 text-sm" /> Add Language / Skill
+              </h2>
+              <form onSubmit={handleLanguageSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
+                    Language/Skill Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Go, GraphQL, Next.js"
+                    value={langFormData.name}
+                    onChange={(e) => setLangFormData(p => ({ ...p, name: e.target.value }))}
+                    className="w-full bg-[#080e1b]/60 border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-cyan-400/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
+                    Skill Classification
+                  </label>
+                  <select
+                    value={langFormData.type}
+                    onChange={(e) => setLangFormData(p => ({ ...p, type: e.target.value as "core" | "other" }))}
+                    className="w-full bg-[#080e1b]/60 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-cyan-400/50 appearance-none"
+                  >
+                    <option value="core" className="bg-[#080e1b]">Core Technologies (Primary)</option>
+                    <option value="other" className="bg-[#080e1b]">Frameworks & Tools (Extensions)</option>
+                  </select>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-cyan-500 to-indigo-500 text-white font-bold py-2.5 rounded-xl shadow-lg shadow-cyan-500/25 mt-4"
+                >
+                  Save Language/Skill
+                </Button>
+              </form>
+            </div>
+
+            {/* List Column */}
+            <div className="lg:col-span-2 glass-panel border border-white/5 rounded-2xl p-6 bg-white/5 text-left flex flex-col justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-white mb-6">Manage Languages & Skills ({languages.length})</h2>
+                {languages.length === 0 ? (
+                  <p className="text-gray-500 text-sm py-12 text-center">No languages or skills configured.</p>
+                ) : (
+                  <div className="space-y-6 max-h-[580px] overflow-y-auto pr-1">
+                    {/* Core Technologies Group */}
+                    <div>
+                      <h3 className="text-sm font-semibold uppercase text-cyan-400 tracking-wider mb-3">Core Technologies</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {languages.filter(l => l.type === "core").map((lang) => (
+                          <div
+                            key={lang.id}
+                            className="flex items-center justify-between p-3 bg-[#080e1b]/60 border border-cyan-500/10 rounded-xl hover:border-cyan-500/30 transition-all duration-300 group"
+                          >
+                            <span className="font-medium text-white group-hover:text-cyan-300 transition-colors">
+                              {lang.name}
+                            </span>
+                            <button
+                              onClick={() => handleLanguageDelete(lang.id)}
+                              className="p-2 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition-all duration-200 cursor-pointer"
+                              aria-label="Delete Language"
+                            >
+                              <FaTrash size={10} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Frameworks & Tools Group */}
+                    <div>
+                      <h3 className="text-sm font-semibold uppercase text-indigo-400 tracking-wider mb-3">Frameworks & Tools</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {languages.filter(l => l.type === "other").map((lang) => (
+                          <div
+                            key={lang.id}
+                            className="flex items-center justify-between p-3 bg-[#080e1b]/60 border border-indigo-500/10 rounded-xl hover:border-indigo-500/30 transition-all duration-300 group"
+                          >
+                            <span className="font-medium text-white group-hover:text-indigo-300 transition-colors">
+                              {lang.name}
+                            </span>
+                            <button
+                              onClick={() => handleLanguageDelete(lang.id)}
+                              className="p-2 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition-all duration-200 cursor-pointer"
+                              aria-label="Delete Language"
+                            >
+                              <FaTrash size={10} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* --- TAB 5: MANAGE SERVICES --- */}
+        {activeTab === "services" && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+          >
+            {/* Form Column */}
+            <div className="lg:col-span-1 glass-panel border border-white/5 rounded-2xl p-6 bg-white/5 text-left h-fit">
+              <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                <FaPlus className="text-cyan-400 text-sm" /> Add Service
+              </h2>
+              <form onSubmit={handleServiceSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
+                    Service Title
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Full-Stack Web Applications"
+                    value={serviceFormData.title}
+                    onChange={(e) => setServiceFormData(p => ({ ...p, title: e.target.value }))}
+                    className="w-full bg-[#080e1b]/60 border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-cyan-400/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
+                    Category
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Frontend & Logic"
+                    value={serviceFormData.category}
+                    onChange={(e) => setServiceFormData(p => ({ ...p, category: e.target.value }))}
+                    className="w-full bg-[#080e1b]/60 border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-cyan-400/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    required
+                    rows={3}
+                    placeholder="Describe what this service delivers..."
+                    value={serviceFormData.description}
+                    onChange={(e) => setServiceFormData(p => ({ ...p, description: e.target.value }))}
+                    className="w-full bg-[#080e1b]/60 border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-cyan-400/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
+                    Technologies (comma separated)
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. React, Next.js, Node.js"
+                    value={serviceFormData.techs}
+                    onChange={(e) => setServiceFormData(p => ({ ...p, techs: e.target.value }))}
+                    className="w-full bg-[#080e1b]/60 border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-cyan-400/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
+                    Icon Select
+                  </label>
+                  <select
+                    value={serviceFormData.iconName}
+                    onChange={(e) => setServiceFormData(p => ({ ...p, iconName: e.target.value }))}
+                    className="w-full bg-[#080e1b]/60 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-cyan-400/50 appearance-none"
+                  >
+                    <option value="FaCode" className="bg-[#080e1b]">FaCode (Web/Coding)</option>
+                    <option value="FaServer" className="bg-[#080e1b]">FaServer (Backend/Cloud)</option>
+                    <option value="FaBrain" className="bg-[#080e1b]">FaBrain (AI/Agents)</option>
+                    <option value="FaWrench" className="bg-[#080e1b]">FaWrench (DX/Tools)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
+                    Accent/Color Classes
+                  </label>
+                  <select
+                    value={serviceFormData.colorClass}
+                    onChange={(e) => setServiceFormData(p => ({ ...p, colorClass: e.target.value }))}
+                    className="w-full bg-[#080e1b]/60 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-cyan-400/50 appearance-none"
+                  >
+                    <option value="from-cyan-400 to-teal-400 text-cyan-400" className="bg-[#080e1b]">Cyan/Teal Gradient</option>
+                    <option value="from-indigo-400 to-cyan-400 text-indigo-400" className="bg-[#080e1b]">Indigo/Cyan Gradient</option>
+                    <option value="from-purple-400 to-indigo-400 text-purple-400" className="bg-[#080e1b]">Purple/Indigo Gradient</option>
+                    <option value="from-teal-400 to-purple-400 text-teal-400" className="bg-[#080e1b]">Teal/Purple Gradient</option>
+                  </select>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-cyan-500 to-indigo-500 text-white font-bold py-2.5 rounded-xl shadow-lg shadow-cyan-500/25 mt-4"
+                >
+                  Save Service
+                </Button>
+              </form>
+            </div>
+
+            {/* List Column */}
+            <div className="lg:col-span-2 glass-panel border border-white/5 rounded-2xl p-6 bg-white/5 text-left flex flex-col justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-white mb-6">Manage Services ({services.length})</h2>
+                {services.length === 0 ? (
+                  <p className="text-gray-500 text-sm py-12 text-center">No services configured.</p>
+                ) : (
+                  <div className="space-y-4 max-h-[580px] overflow-y-auto pr-1">
+                    {services.map((service) => (
+                      <div
+                        key={service.id}
+                        className="flex items-center justify-between p-4 bg-[#080e1b]/60 border border-white/5 rounded-xl hover:border-cyan-500/30 transition-all duration-300 group"
+                      >
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[10px] text-cyan-400 uppercase tracking-widest font-semibold font-mono">
+                            {service.category}
+                          </span>
+                          <h3 className="font-bold text-white group-hover:text-cyan-300 transition-colors">
+                            {service.title}
+                          </h3>
+                          <p className="text-xs text-gray-400 line-clamp-2 max-w-md leading-relaxed">
+                            {service.description}
+                          </p>
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {service.techs.map((tech, idx) => (
+                              <span key={idx} className="bg-white/5 text-gray-300 text-[9px] px-1.5 py-0.5 rounded border border-white/5">
+                                {tech}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleServiceDelete(service.id)}
+                          className="p-2.5 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white rounded-xl transition-all duration-200 flex-shrink-0 cursor-pointer"
+                          aria-label="Delete Service"
                         >
                           <FaTrash size={12} />
                         </button>

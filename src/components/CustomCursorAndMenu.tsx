@@ -65,12 +65,19 @@ export default function CustomCursorAndMenu() {
     };
   }, []);
 
-  // ── Right-click → redirect to /busted ─────────────────────────────────────
+  // ── Cancel native context menu on right-click ─────────────────────────────
   useEffect(() => {
-    const onContextMenu = (e: MouseEvent) => e.preventDefault();
+    let rightClicks = 0;
+    const onContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      rightClicks++;
+      if (rightClicks >= 5) {
+        router.push('/busted');
+      }
+    };
     window.addEventListener('contextmenu', onContextMenu);
     return () => window.removeEventListener('contextmenu', onContextMenu);
-  }, []);
+  }, [router]);
 
   return (
     <>
