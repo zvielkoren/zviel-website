@@ -2,15 +2,36 @@ import { PrismaClient } from '@prisma/client'
 import { PrismaD1 } from '@prisma/adapter-d1'
 import { getCloudflareContext } from '@opennextjs/cloudflare'
 
-export function getPrisma() {
-  const { env } = getCloudflareContext();
-  const dbBinding = env.DB;
+declare global {
+  var prismaGlobal: PrismaClient | undefined;
+}
 
-  if (!dbBinding) {
-    throw new Error("D1 Database binding 'DB' was not found.");
+export function getPrisma() {
+  if (globalThis.prismaGlobal) {
+    return globalThis.prismaGlobal;
   }
 
-  const adapter = new PrismaD1(dbBinding)
-  return new PrismaClient({ adapter })
+  let env: any = {};
+  try {
+    env = getCloudflareContext()?.env || {};
+  } catch (e) {
+    console.warn("Failed to retrieve Cloudflare context:", e);
+  }
 
+  const dbBinding = env.DB;
+
+  let client: PrismaClient;
+  if (!dbBinding) {
+    console.warn("D1 Database binding 'DB' was not found. Using default PrismaClient fallback.");
+    client = new PrismaClient();
+  } else {
+    const adapter = new PrismaD1(dbBinding);
+    client = new PrismaClient({ adapter });
+  }
+
+  if (process.env.NODE_ENV !== 'production') {
+    globalThis.prismaGlobal = client;
+  }
+
+  return client;
 }
