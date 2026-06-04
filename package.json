@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "eslint .",
     "preview": "opennextjs-cloudflare preview",
-    "wrangler": "echo"
+    "wrangler": "echo",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
@@ -59,7 +60,9 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
+      "@prisma/engines",
       "esbuild",
+      "prisma",
       "sharp",
       "workerd"
     ]
