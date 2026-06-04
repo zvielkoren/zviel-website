@@ -139,4 +139,4 @@ export async function DELETE(request: Request) {
     );
   }
 }
-export default {};
+
