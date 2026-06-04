@@ -1,0 +1,39 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": ".open-next/worker.js",
+	"name": "zviel-websit",
+	"compatibility_date": "2026-06-04",
+	"compatibility_flags": [
+		"nodejs_compat",
+		"global_fetch_strictly_public"
+	],
+	"assets": {
+		"directory": ".open-next/assets",
+		"binding": "ASSETS"
+	},
+	"services": [
+		{
+			// Self-reference service binding, the service name must match the worker name
+			// see https://opennext.js.org/cloudflare/caching
+			"binding": "WORKER_SELF_REFERENCE",
+			"service": "zviel-websit"
+		}
+	],
+	"images": {
+		// Enable image optimization
+		// see https://opennext.js.org/cloudflare/howtos/image
+		"binding": "IMAGES"
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "zviel-website-db",
+			"database_id": "9b4a91e8-b258-4a5c-b672-b863d1207550"
+		}
+	],
+	"vars": {
+		"NODE_VERSION": "24.0.0",
+		"ADMIN_USERNAME": "admin",
+		"HOST_VERSIONS_API": "https://zviel.com/api/versions"
+	}
+}
