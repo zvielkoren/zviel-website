@@ -23,9 +23,9 @@ const ContactPage: React.FC = () => {
         <div className="md:col-span-5 flex flex-col gap-6">
           <div className="glass-panel border border-white/5 p-6 rounded-2xl relative overflow-hidden bg-[#0c1325]/40 flex flex-col gap-5">
             <div className="ambient-glow-cyan -top-12 -left-12 w-24 h-24 blur-xl opacity-50" />
-            
+
             <h2 className="text-xl font-bold text-white mb-2">Connect Directly</h2>
-            
+
             {/* WhatsApp Link */}
             <a
               href="https://wa.me/972559519870"
@@ -62,7 +62,7 @@ const ContactPage: React.FC = () => {
 
             {/* LinkedIn Link */}
             <a
-              href="https://www.linkedin.com/in/zviel-koren-39b6542b2/"
+              href="https://www.linkedin.com/in/zvielkoren/"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-4 p-4 rounded-xl border border-white/5 hover:border-indigo-500/30 bg-white/5 hover:bg-indigo-950/20 transition-all duration-300 group hover:scale-[1.02] active:scale-[0.98]"
@@ -73,7 +73,7 @@ const ContactPage: React.FC = () => {
               <div className="flex flex-col text-left">
                 <span className="text-xs text-gray-400 font-semibold uppercase tracking-wider">LinkedIn</span>
                 <span className="text-sm font-bold text-white group-hover:text-indigo-400 transition-colors">
-                  zviel-koren
+                  zvielkoren
                 </span>
               </div>
             </a>
