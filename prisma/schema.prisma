@@ -1,0 +1,53 @@
+// Prisma schema for Cloudflare D1 (SQLite)
+// Mirrors the existing schema.sql tables
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Demo {
+  id          String     @id @default(uuid())
+  title       String
+  description String
+  url         String?
+  imageUrl    String
+  fileType    String?
+  filePath    String?
+  isActive    Int        @default(1)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now()) @updatedAt
+  features    Feature[]
+  files       DemoFile[]
+}
+
+model Feature {
+  id        String   @id @default(uuid())
+  name      String
+  demoId    String
+  isEnabled Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  demo      Demo     @relation(fields: [demoId], references: [id])
+
+  @@index([demoId])
+}
+
+model DemoFile {
+  id        String   @id @default(uuid())
+  demoId    String
+  name      String
+  path      String
+  content   Bytes
+  fileType  String
+  size      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  demo      Demo     @relation(fields: [demoId], references: [id])
+
+  @@index([demoId])
+}
