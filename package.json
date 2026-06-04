@@ -4,14 +4,17 @@
   "private": true,
   "packageManager": "pnpm@10.0.0",
   "scripts": {
-    "dev": "next dev",
     "build": "next build",
+    "dev": "next dev",
     "pages:build": "opennextjs-cloudflare build && mv .open-next/worker.js .open-next/_worker.js && cp -r .open-next/assets/* .open-next/ && node scripts/patch-worker.js",
     "start": "next start",
     "lint": "eslint .",
-    "preview": "opennextjs-cloudflare preview",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "wrangler": "echo",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
     "@emailjs/browser": "4.4.1",
@@ -52,7 +55,7 @@
     "prisma": "7.8.0",
     "tailwindcss": "4.3.0",
     "typescript": "6.0.3",
-    "wrangler": "4.90.0"
+    "wrangler": "4.98.0"
   },
   "browser": {
     "crypto": false,
