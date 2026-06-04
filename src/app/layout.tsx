@@ -4,12 +4,36 @@ import Navbar from "@/components/Navbar";
 import A11yWidget from "@/components/A11yWidget";
 import CustomCursorAndMenu from "@/components/CustomCursorAndMenu";
 import { Providers } from "./providers";
+import AnnouncementBanner from "@/components/AnnouncementBanner";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
+  metadataBase: new URL("https://zviel.com"),
   title: "Zviel Koren | Full Stack Developer",
   description: "Personal portfolio website of Zviel Koren - Full Stack Developer",
+  openGraph: {
+    title: "Zviel Koren | Full Stack Developer",
+    description: "Personal portfolio website of Zviel Koren - Full Stack Developer",
+    url: "https://zviel.com",
+    siteName: "Zviel Koren Portfolio",
+    images: [
+      {
+        url: "/og-banner.png",
+        width: 1200,
+        height: 630,
+        alt: "Zviel Koren | Full Stack Developer Portfolio Banner",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Zviel Koren | Full Stack Developer",
+    description: "Personal portfolio website of Zviel Koren - Full Stack Developer",
+    images: ["/og-banner.png"],
+  },
 };
 
 export default function RootLayout({
@@ -53,6 +77,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <Providers>
           <CustomCursorAndMenu />
+          <AnnouncementBanner />
           <Navbar />
           {children}
           <A11yWidget />
