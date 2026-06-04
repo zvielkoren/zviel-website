@@ -12,7 +12,7 @@ database_id = "YOUR_DATABASE_ID"  # Replace with your D1 database ID
 [vars]
 ADMIN_USERNAME = "admin"
 HOST_VERSIONS_API = "https://zviel.com/api/versions"
-
+NODE_VERSION = "24.0.0"
 # Secrets — set via Cloudflare dashboard or CLI:
 #   wrangler pages secret put GITHUB_TOKEN
 #   wrangler pages secret put ADMIN_PASSWORD

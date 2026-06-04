@@ -8,7 +8,7 @@ interface CloudflareBindings {
   // Non-secret vars (set in wrangler.toml [vars])
   ADMIN_USERNAME: string;
   HOST_VERSIONS_API: string;
-
+  NODE_VERSION: string;
   // Secrets (set via dashboard or `wrangler pages secret put`)
   GITHUB_TOKEN: string;
   ADMIN_PASSWORD: string;
@@ -19,4 +19,4 @@ interface CloudflareBindings {
   CLOUDFLARE_API_TOKEN: string;
 }
 
-interface CloudflareEnv extends CloudflareBindings {}
+interface CloudflareEnv extends CloudflareBindings { }
