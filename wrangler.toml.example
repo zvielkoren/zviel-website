@@ -1,13 +1,23 @@
 name = "zviel-website"
 compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".open-next"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "zviel-website-db"
 database_id = "YOUR_DATABASE_ID"  # Replace with your D1 database ID
 
-[build]
-command = "npm run build"
-cwd = "."
-watch_dir = "src"
+# Non-secret environment variables
+[vars]
+ADMIN_USERNAME = "admin"
+HOST_VERSIONS_API = "https://zviel.com/api/versions"
+
+# Secrets — set via Cloudflare dashboard or CLI:
+#   wrangler pages secret put GITHUB_TOKEN
+#   wrangler pages secret put ADMIN_PASSWORD
+#   wrangler pages secret put JWT_SECRET
+#   wrangler pages secret put NEXT_PUBLIC_EMAILJS_SERVICE_ID
+#   wrangler pages secret put NEXT_PUBLIC_EMAILJS_TEMPLATE_ID
+#   wrangler pages secret put NEXT_PUBLIC_EMAILJS_USER_ID
+#   wrangler pages secret put CLOUDFLARE_API_TOKEN

@@ -4,10 +4,7 @@ import { getCloudflareContext } from '@opennextjs/cloudflare'
 
 export function getPrisma() {
   const { env } = getCloudflareContext();
-
-  // Cast 'env' to 'any' to bypass the missing DB property error in CloudflareEnv
-  const cloudflareEnv = env as any;
-  const dbBinding = cloudflareEnv.DB;
+  const dbBinding = env.DB;
 
   if (!dbBinding) {
     throw new Error("D1 Database binding 'DB' was not found.");
