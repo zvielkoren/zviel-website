@@ -120,7 +120,7 @@ html.a11y-text-extra-large {
 
 /* 6. Reduced Motion */
 .a11y-motion-reduced,
-.a11y-motion-reduced * {
+.a11y-motion-reduced *:not(.custom-cursor) {
   animation-delay: -1ms !important;
   animation-duration: 1ms !important;
   animation-iteration-count: 1 !important;

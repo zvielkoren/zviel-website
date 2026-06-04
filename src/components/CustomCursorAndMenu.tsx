@@ -17,8 +17,6 @@ export default function CustomCursorAndMenu() {
 
   // ── Smooth animation loop ──────────────────────────────────────────────────
   useEffect(() => {
-    const LERP = 0.10;
-
     const animate = () => {
       const dot = dotRef.current;
       const ring = ringRef.current;
@@ -26,6 +24,10 @@ export default function CustomCursorAndMenu() {
         rafId.current = requestAnimationFrame(animate);
         return;
       }
+
+      // If motion is reduced, set LERP to 1.0 (instant movement) to prevent animations
+      const isReduced = document.documentElement.classList.contains('a11y-motion-reduced');
+      const LERP = isReduced ? 1.0 : 0.10;
 
       dot.style.transform = `translate(${mousePos.current.x - 4}px, ${mousePos.current.y - 4}px)`;
 
@@ -85,7 +87,7 @@ export default function CustomCursorAndMenu() {
       <div
         ref={dotRef}
         aria-hidden="true"
-        className="pointer-events-none fixed top-0 left-0 z-[9999] w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_2px_rgba(34,211,238,0.8)]"
+        className="custom-cursor pointer-events-none fixed top-0 left-0 z-[9999] w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_2px_rgba(34,211,238,0.8)]"
         style={{ willChange: 'transform' }}
       />
 
@@ -93,7 +95,7 @@ export default function CustomCursorAndMenu() {
       <div
         ref={ringRef}
         aria-hidden="true"
-        className="pointer-events-none fixed top-0 left-0 z-[9998] rounded-full border border-cyan-400/60 shadow-[0_0_12px_2px_rgba(34,211,238,0.3)]"
+        className="custom-cursor pointer-events-none fixed top-0 left-0 z-[9998] rounded-full border border-cyan-400/60 shadow-[0_0_12px_2px_rgba(34,211,238,0.3)]"
         style={{
           width: 32,
           height: 32,
