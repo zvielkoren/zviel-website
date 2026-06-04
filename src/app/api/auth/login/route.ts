@@ -1,11 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import * as jose from 'jose';
+import { SignJWT } from 'jose';
 import { getEnvVar } from '@/utils/env';
-
-// Add Edge Runtime configuration
-export const runtime = 'edge';
-
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -20,7 +16,7 @@ export async function POST(request: Request) {
     if (username && username === adminUsername && password && password === adminPassword) {
       // Create JWT token using jose
       const secret = new TextEncoder().encode(jwtSecret);
-      const token = await new jose.SignJWT({ username })
+      const token = await new SignJWT({ username })
         .setProtectedHeader({ alg: 'HS256' })
         .setExpirationTime('1h')
         .sign(secret);

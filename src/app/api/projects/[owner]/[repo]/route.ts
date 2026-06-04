@@ -1,9 +1,6 @@
 // /app/api/projects/[owner]/[repo]/route.ts
 import { NextResponse } from "next/server";
 import { getEnvVar } from "@/utils/env";
-
-export const runtime = 'edge';
-
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ owner: string; repo: string }> }

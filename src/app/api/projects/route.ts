@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import { getProjects, addProject, deleteProject } from "@/lib/portfolioService";
 import { getEnvVar } from "@/utils/env";
-
-export const runtime = 'edge';
-
 export async function GET() {
   console.log("Projects API: GET request received");
   

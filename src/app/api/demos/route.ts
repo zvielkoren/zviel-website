@@ -2,9 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAllDemos, createDemo, deleteDemo } from '@/lib/demoService';
 import JSZip from 'jszip';
 // D1 client import removed; not used in Edge runtime
-
-export const runtime = 'edge';
-
 /**
  * GET /api/demos
  * Fetches a list of active demos along with their features and files.

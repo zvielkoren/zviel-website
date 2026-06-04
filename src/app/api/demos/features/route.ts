@@ -10,8 +10,6 @@ interface Feature {
 let __mockFeatures: Feature[] = [];
 let __nextId = 1;
 
-export const runtime = 'edge';
-
 export async function POST(request: Request) {
   try {
     const { demoId, featureName } = await request.json();

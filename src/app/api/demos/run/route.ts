@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { CodeRunner } from '@/utils/codeRunner';
-
-// Add Edge Runtime configuration
-export const runtime = 'edge';
-
 // Extend the global scope to include D1
 declare global {
   var D1: any;

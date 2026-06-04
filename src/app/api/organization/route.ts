@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import { getOrganizations, addOrganization, deleteOrganization } from "@/lib/portfolioService";
 import { getEnvVar } from "@/utils/env";
-
-export const runtime = "edge";
-
 export async function GET() {
   console.log("Organization API: GET request received");
   
