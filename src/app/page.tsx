@@ -94,9 +94,7 @@ export default function Home() {
           variants={itemVariants}
           className="text-base md:text-lg text-gray-300 max-w-2xl leading-relaxed mb-10 px-4"
         >
-          Hi, I'm Zviel, a passionate developer dedicated to engineering elegant, highly
-          scalable, and high-performance digital experiences. I specialize in modern backend
-          architecture, type-safe frontend design, and responsive interactive products.
+          Hi, I'm Zviel — a Systems & Full-Stack Engineer dedicated to building high-performance, scalable, and elegant digital experiences. I specialize in robust backend architecture, modern frontend design, and low-level optimization to deliver fast, reliable, and user-centric software
         </motion.p>
 
         <motion.div variants={itemVariants} className="flex flex-wrap gap-4 justify-center">

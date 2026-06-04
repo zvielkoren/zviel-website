@@ -19,4 +19,4 @@ export const config = {
     matcher: ['/dashboard/:path*'],
 };
 
-export const runtime = 'nodejs';
+export const runtime = 'experimental-edge';
