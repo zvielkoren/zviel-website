@@ -3,3 +3,8 @@
 interface CloudflareBindings {
   DB: D1Database;
 }
+
+// Merge custom bindings into the CloudflareEnv interface used by @opennextjs/cloudflare
+declare global {
+  interface CloudflareEnv extends CloudflareBindings {}
+}
