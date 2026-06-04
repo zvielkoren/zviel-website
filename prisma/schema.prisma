@@ -3,7 +3,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -50,4 +49,40 @@ model DemoFile {
   demo      Demo     @relation(fields: [demoId], references: [id])
 
   @@index([demoId])
+}
+
+model Project {
+  id          String   @id
+  name        String
+  description String
+  githubLink  String
+  owner       String
+  ownerName   String
+  stars       Int
+  language    String
+  updatedAt   DateTime @default(now()) @updatedAt
+  private     Boolean
+}
+
+model Organization {
+  name    String @id
+  mission String
+  link    String
+  logo    String
+}
+
+model Language {
+  id   String @id
+  name String
+  type String // "core" or "other"
+}
+
+model Service {
+  id          String @id
+  title       String
+  category    String
+  description String
+  techs       String // Store techs as a JSON or comma-separated string
+  iconName    String
+  colorClass  String
 }
