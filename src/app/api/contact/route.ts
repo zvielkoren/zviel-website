@@ -52,6 +52,7 @@ export async function POST(request: NextRequest) {
             from_name: name,
             from_email: email,
             message,
+            profile_image: "https://zviel.com/profile-picture-mail.png",
           },
         }),
       }
