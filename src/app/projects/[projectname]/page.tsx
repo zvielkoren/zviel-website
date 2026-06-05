@@ -2,13 +2,16 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { FaGithub, FaStar, FaCalendar, FaCode, FaTimes } from 'react-icons/fa';
-import ReactMarkdown from 'react-markdown';
+import dynamic from 'next/dynamic';
 import Loading from '@/components/Loading';
 import ErrorMessage from '@/components/ErrorMessage';
 import { motion, AnimatePresence } from 'framer-motion';
-import remarkGfm from 'remark-gfm';
-import rehypeRaw from 'rehype-raw';
-import type { ComponentProps } from 'react';
+
+const MarkdownRenderer = dynamic(() => import('@/components/MarkdownRenderer'), {
+  ssr: false,
+  loading: () => <p className="text-gray-300">Loading preview...</p>
+});
+
 interface Project {
   id: string;
   name: string;
@@ -128,53 +131,7 @@ export default function ProjectModalPage() {
 
           {/* README Markdown */}
           <div className="max-w-none bg-blue-800/70 text-blue-100 p-6 rounded-md overflow-x-auto">
-            <ReactMarkdown
-              children={readme || 'No README available.'}
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeRaw]}
-              components={{
-                code({
-                  inline,
-                  className,
-                  children,
-                  ...props
-                }: ComponentProps<'code'> & { inline?: boolean }) {
-                  return (
-                    <code
-                      className={`bg-blue-700 text-blue-100 px-2 py-1 rounded text-sm ${
-                        inline ? 'inline' : 'block my-2'
-                      }`}
-                      {...props}
-                    >
-                      {children}
-                    </code>
-                  );
-                },
-                pre({ className, children, ...props }) {
-                  return (
-                    <pre
-                      className="bg-blue-700 text-blue-100 p-4 rounded-md overflow-x-auto my-4"
-                      {...props}
-                    >
-                      {children}
-                    </pre>
-                  );
-                },
-                a({ href, children, ...props }) {
-                  return (
-                    <a
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-200 hover:underline"
-                      {...props}
-                    >
-                      {children}
-                    </a>
-                  );
-                },
-              }}
-            />
+            <MarkdownRenderer content={readme || 'No README available.'} />
           </div>
         </motion.div>
       </motion.div>
