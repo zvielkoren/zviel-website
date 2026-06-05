@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import emailjs from "@emailjs/browser";
 import { FaPaperPlane, FaCheckCircle, FaSpinner, FaExclamationTriangle } from "react-icons/fa";
 
 interface FormData {
@@ -48,17 +47,21 @@ const ContactForm = () => {
       }
 
       setIsSending(true);
-      const templateParams = {
-        from_name: data.name,
-        from_email: data.email,
-        message: data.message,
-      };
 
-      const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
-      const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
-      const userId = process.env.NEXT_PUBLIC_EMAILJS_USER_ID;
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          message: data.message,
+        }),
+      });
 
-      await emailjs.send(serviceId!, templateId!, templateParams, userId!);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to send message.");
+      }
       
       // Store success timestamp in localStorage
       localStorage.setItem("contact_form_last_sent", Date.now().toString());

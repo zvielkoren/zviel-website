@@ -21,6 +21,7 @@ const nextConfig = {
       "framer-motion"
     ]
   },
+  turbopack: {},
   webpack: (config, { isServer }) => {
     if (isServer) {
       config.optimization.minimize = true;
