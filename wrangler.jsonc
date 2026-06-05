@@ -6,7 +6,6 @@
 		"nodejs_compat"
 	],
 	"pages_build_output_dir": ".open-next",
-	"minify": true,
 	"d1_databases": [
 		{
 			"binding": "DB",

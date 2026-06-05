@@ -1,10 +1,11 @@
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 const workerPath = path.join(__dirname, '../.open-next/_worker.js');
 
 if (fs.existsSync(workerPath)) {
-  console.log('Patching .open-next/_worker.js with module.require polyfill...');
+  console.log('Patching .open-next/_worker.js with static import and polyfills...');
   let content = fs.readFileSync(workerPath, 'utf8');
 
   // Define Node compatibility polyfill
@@ -14,11 +15,39 @@ globalThis.module = globalThis.module || {};
 globalThis.module.require = globalThis.module.require || globalThis.require;
 `;
 
-  // Prepend the polyfill
-  content = polyfill + '\n' + content;
+  // Convert dynamic import of handler.mjs to a static import at the top so esbuild can bundle it
+  content = content.replace(
+    'const { handler } = await import("./server-functions/default/handler.mjs");',
+    ''
+  );
+
+  // Prepend the static import and polyfill
+  content = `import { handler } from "./server-functions/default/handler.mjs";\n` + polyfill + '\n' + content;
 
   fs.writeFileSync(workerPath, content, 'utf8');
   console.log('Worker patched successfully.');
+
+  // Run esbuild to bundle the entire worker into a single minified file
+  console.log('Bundling and minifying worker with esbuild...');
+  try {
+    // List of Node.js built-ins to be marked as external (both with and without node: prefix)
+    const externals = [
+      'node:*',
+      'async_hooks', 'fs', 'path', 'os', 'url', 'vm', 'buffer', 'util', 'module', 'events', 'http', 'https',
+      'crypto', 'stream', 'zlib', 'assert', 'dns', 'net', 'tls', 'string_decoder', 'readline', 'querystring',
+      'punycode', 'child_process',
+      'cloudflare:*'
+    ].map(ext => `--external:${ext}`).join(' ');
+
+    execSync(
+      `npx esbuild "${workerPath}" --bundle --minify --platform=neutral --target=es2022 --outfile="${workerPath}" --allow-overwrite ${externals}`,
+      { stdio: 'inherit' }
+    );
+    console.log('Esbuild bundling completed successfully.');
+  } catch (err) {
+    console.error('Error running esbuild:', err);
+    process.exit(1);
+  }
 
   // Generate _routes.json to let Cloudflare Pages serve static files directly rather than routing them to the worker
   const routesPath = path.join(__dirname, '../.open-next/_routes.json');
