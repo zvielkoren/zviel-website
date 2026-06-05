@@ -30,17 +30,17 @@ globalThis.module.require = globalThis.module.require || globalThis.require;
   // Run esbuild to bundle the entire worker into a single minified file
   console.log('Bundling and minifying worker with esbuild...');
   try {
-    // List of Node.js built-ins to be marked as external (both with and without node: prefix)
-    const externals = [
-      'node:*',
+    // List of Node.js built-ins to be aliased to their node: prefix equivalents
+    const modules = [
       'async_hooks', 'fs', 'path', 'os', 'url', 'vm', 'buffer', 'util', 'module', 'events', 'http', 'https',
       'crypto', 'stream', 'zlib', 'assert', 'dns', 'net', 'tls', 'string_decoder', 'readline', 'querystring',
-      'punycode', 'child_process',
-      'cloudflare:*'
-    ].map(ext => `--external:${ext}`).join(' ');
+      'punycode', 'child_process'
+    ];
+    const aliases = modules.map(mod => `--alias:${mod}=node:${mod}`).join(' ');
+    const externals = '--external:node:* --external:cloudflare:*';
 
     execSync(
-      `npx esbuild "${workerPath}" --bundle --minify --platform=neutral --target=es2022 --outfile="${workerPath}" --allow-overwrite ${externals}`,
+      `npx esbuild "${workerPath}" --bundle --minify --platform=neutral --target=es2022 --outfile="${workerPath}" --allow-overwrite ${aliases} ${externals}`,
       { stdio: 'inherit' }
     );
     console.log('Esbuild bundling completed successfully.');
