@@ -11,7 +11,6 @@
     "lint": "eslint .",
     "preview": "pnpm run pages:build && wrangler pages dev .open-next",
     "wrangler": "echo",
-    "postinstall": "prisma generate",
     "deploy": "pnpm run pages:build && wrangler pages deploy .open-next",
     "upload": "pnpm run pages:build && wrangler pages deploy .open-next",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
@@ -20,8 +19,6 @@
     "@emailjs/browser": "4.4.1",
     "@heroui/react": "3.0.4",
     "@heroui/styles": "3.0.4",
-    "@prisma/adapter-d1": "7.8.0",
-    "@prisma/client": "7.8.0",
     "framer-motion": "12.38.0",
     "jose": "6.2.3",
     "jszip": "3.10.1",

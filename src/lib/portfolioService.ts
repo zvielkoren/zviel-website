@@ -1,4 +1,4 @@
-import { getPrisma } from "./db";
+import { queryD1, runD1 } from "./db";
 
 export interface Project {
   id: string;
@@ -93,11 +93,18 @@ const DEFAULT_SERVICES: Service[] = [
 
 export async function getProjects(): Promise<Project[]> {
   try {
-    const prisma = getPrisma();
-    const projects = await prisma.project.findMany();
+    const projects = await queryD1<any>("SELECT * FROM Project");
     return projects.map(p => ({
-      ...p,
-      updatedAt: p.updatedAt.toISOString()
+      id: p.id,
+      name: p.name,
+      description: p.description,
+      githubLink: p.githubLink,
+      owner: p.owner,
+      ownerName: p.ownerName,
+      stars: Number(p.stars),
+      language: p.language,
+      updatedAt: p.updatedAt ? new Date(p.updatedAt).toISOString() : new Date().toISOString(),
+      private: Boolean(p.private)
     }));
   } catch (e) {
     console.error("Failed to load projects from DB:", e);
@@ -106,52 +113,46 @@ export async function getProjects(): Promise<Project[]> {
 }
 
 export async function addProject(project: Omit<Project, "updatedAt">): Promise<Project> {
-  const prisma = getPrisma();
-  const updated = await prisma.project.upsert({
-    where: { id: project.id },
-    update: {
-      name: project.name,
-      description: project.description,
-      githubLink: project.githubLink,
-      owner: project.owner,
-      ownerName: project.ownerName,
-      stars: project.stars,
-      language: project.language,
-      private: project.private
-    },
-    create: {
-      id: project.id,
-      name: project.name,
-      description: project.description,
-      githubLink: project.githubLink,
-      owner: project.owner,
-      ownerName: project.ownerName,
-      stars: project.stars,
-      language: project.language,
-      private: project.private
-    }
-  });
+  const now = new Date().toISOString();
+  await runD1(
+    `INSERT INTO Project (id, name, description, githubLink, owner, ownerName, stars, language, updatedAt, private)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(id) DO UPDATE SET
+       name=excluded.name,
+       description=excluded.description,
+       githubLink=excluded.githubLink,
+       owner=excluded.owner,
+       ownerName=excluded.ownerName,
+       stars=excluded.stars,
+       language=excluded.language,
+       updatedAt=excluded.updatedAt,
+       private=excluded.private`,
+    [
+      project.id,
+      project.name,
+      project.description,
+      project.githubLink,
+      project.owner,
+      project.ownerName,
+      project.stars,
+      project.language,
+      now,
+      project.private ? 1 : 0
+    ]
+  );
   return {
-    ...updated,
-    updatedAt: updated.updatedAt.toISOString()
+    ...project,
+    updatedAt: now
   };
 }
 
 export async function deleteProject(id: string): Promise<boolean> {
-  try {
-    const prisma = getPrisma();
-    await prisma.project.delete({ where: { id } });
-    return true;
-  } catch (e) {
-    console.error("Failed to delete project:", e);
-    return false;
-  }
+  return await runD1("DELETE FROM Project WHERE id = ?", [id]);
 }
 
 export async function getOrganizations(): Promise<Organization[]> {
   try {
-    const prisma = getPrisma();
-    return await prisma.organization.findMany();
+    return await queryD1<Organization>("SELECT * FROM Organization");
   } catch (e) {
     console.error("Failed to load organizations:", e);
     return [];
@@ -159,42 +160,29 @@ export async function getOrganizations(): Promise<Organization[]> {
 }
 
 export async function addOrganization(org: Organization): Promise<Organization> {
-  const prisma = getPrisma();
-  return await prisma.organization.upsert({
-    where: { name: org.name },
-    update: {
-      mission: org.mission,
-      link: org.link,
-      logo: org.logo
-    },
-    create: {
-      name: org.name,
-      mission: org.mission,
-      link: org.link,
-      logo: org.logo
-    }
-  });
+  await runD1(
+    `INSERT INTO Organization (name, mission, link, logo)
+     VALUES (?, ?, ?, ?)
+     ON CONFLICT(name) DO UPDATE SET
+       mission=excluded.mission,
+       link=excluded.link,
+       logo=excluded.logo`,
+    [org.name, org.mission, org.link, org.logo]
+  );
+  return org;
 }
 
 export async function deleteOrganization(name: string): Promise<boolean> {
-  try {
-    const prisma = getPrisma();
-    await prisma.organization.delete({ where: { name } });
-    return true;
-  } catch (e) {
-    console.error("Failed to delete organization:", e);
-    return false;
-  }
+  return await runD1("DELETE FROM Organization WHERE name = ?", [name]);
 }
 
 export async function getLanguages(): Promise<Language[]> {
   try {
-    const prisma = getPrisma();
-    const list = await prisma.language.findMany();
+    const list = await queryD1<Language>("SELECT * FROM Language");
     if (list.length === 0) {
       // Seed default languages
       for (const lang of DEFAULT_LANGUAGES) {
-        await prisma.language.create({ data: { id: lang.id, name: lang.name, type: lang.type } });
+        await runD1("INSERT INTO Language (id, name, type) VALUES (?, ?, ?)", [lang.id, lang.name, lang.type]);
       }
       return DEFAULT_LANGUAGES;
     }
@@ -210,55 +198,39 @@ export async function getLanguages(): Promise<Language[]> {
 }
 
 export async function addLanguage(lang: Language): Promise<Language> {
-  const prisma = getPrisma();
-  const saved = await prisma.language.upsert({
-    where: { id: lang.id },
-    update: {
-      name: lang.name,
-      type: lang.type
-    },
-    create: {
-      id: lang.id,
-      name: lang.name,
-      type: lang.type
-    }
-  });
-  return {
-    id: saved.id,
-    name: saved.name,
-    type: saved.type as "core" | "other"
-  };
+  await runD1(
+    `INSERT INTO Language (id, name, type)
+     VALUES (?, ?, ?)
+     ON CONFLICT(id) DO UPDATE SET
+       name=excluded.name,
+       type=excluded.type`,
+    [lang.id, lang.name, lang.type]
+  );
+  return lang;
 }
 
 export async function deleteLanguage(id: string): Promise<boolean> {
-  try {
-    const prisma = getPrisma();
-    await prisma.language.delete({ where: { id } });
-    return true;
-  } catch (e) {
-    console.error("Failed to delete language:", e);
-    return false;
-  }
+  return await runD1("DELETE FROM Language WHERE id = ?", [id]);
 }
 
 export async function getServices(): Promise<Service[]> {
   try {
-    const prisma = getPrisma();
-    const list = await prisma.service.findMany();
+    const list = await queryD1<any>("SELECT * FROM Service");
     if (list.length === 0) {
       // Seed default services
       for (const service of DEFAULT_SERVICES) {
-        await prisma.service.create({
-          data: {
-            id: service.id,
-            title: service.title,
-            category: service.category,
-            description: service.description,
-            techs: service.techs.join(","),
-            iconName: service.iconName,
-            colorClass: service.colorClass
-          }
-        });
+        await runD1(
+          "INSERT INTO Service (id, title, category, description, techs, iconName, colorClass) VALUES (?, ?, ?, ?, ?, ?, ?)",
+          [
+            service.id,
+            service.title,
+            service.category,
+            service.description,
+            service.techs.join(","),
+            service.iconName,
+            service.colorClass
+          ]
+        );
       }
       return DEFAULT_SERVICES;
     }
@@ -267,7 +239,7 @@ export async function getServices(): Promise<Service[]> {
       title: s.title,
       category: s.category,
       description: s.description,
-      techs: s.techs.split(",").map(t => t.trim()).filter(Boolean),
+      techs: s.techs ? s.techs.split(",").map((t: string) => t.trim()).filter(Boolean) : [],
       iconName: s.iconName,
       colorClass: s.colorClass
     }));
@@ -278,42 +250,32 @@ export async function getServices(): Promise<Service[]> {
 }
 
 export async function addService(service: Service): Promise<Service> {
-  const prisma = getPrisma();
-  const saved = await prisma.service.upsert({
-    where: { id: service.id },
-    update: {
-      title: service.title,
-      category: service.category,
-      description: service.description,
-      techs: service.techs.join(","),
-      iconName: service.iconName,
-      colorClass: service.colorClass
-    },
-    create: {
-      id: service.id,
-      title: service.title,
-      category: service.category,
-      description: service.description,
-      techs: service.techs.join(","),
-      iconName: service.iconName,
-      colorClass: service.colorClass
-    }
-  });
-  return {
-    ...saved,
-    techs: saved.techs.split(",").map(t => t.trim()).filter(Boolean)
-  };
+  await runD1(
+    `INSERT INTO Service (id, title, category, description, techs, iconName, colorClass)
+     VALUES (?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(id) DO UPDATE SET
+       title=excluded.title,
+       category=excluded.category,
+       description=excluded.description,
+       techs=excluded.techs,
+       iconName=excluded.iconName,
+       colorClass=excluded.colorClass`,
+    [
+      service.id,
+      service.title,
+      service.category,
+      service.description,
+      service.techs.join(","),
+      service.iconName,
+      service.colorClass
+    ]
+  );
+  return service;
 }
 
 export async function deleteService(id: string): Promise<boolean> {
-  try {
-    const prisma = getPrisma();
-    await prisma.service.delete({ where: { id } });
-    return true;
-  } catch (e) {
-    console.error("Failed to delete service:", e);
-    return false;
-  }
+  return await runD1("DELETE FROM Service WHERE id = ?", [id]);
 }
+
 
 

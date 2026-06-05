@@ -1,37 +1,43 @@
-import { PrismaClient } from '@prisma/client'
-import { PrismaD1 } from '@prisma/adapter-d1'
-import { getCloudflareContext } from '@opennextjs/cloudflare'
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 
-declare global {
-  var prismaGlobal: PrismaClient | undefined;
-}
-
-export function getPrisma() {
-  if (globalThis.prismaGlobal) {
-    return globalThis.prismaGlobal;
-  }
-
+export function getD1(): any {
   let env: any = {};
   try {
     env = getCloudflareContext()?.env || {};
   } catch (e) {
-    console.warn("Failed to retrieve Cloudflare context:", e);
+    // Context might be unavailable during local Next.js dev server initialization
   }
+  return env.DB || null;
+}
 
-  const dbBinding = env.DB;
-
-  let client: PrismaClient;
-  if (!dbBinding) {
-    console.warn("D1 Database binding 'DB' was not found. Using default PrismaClient fallback.");
-    client = new PrismaClient();
-  } else {
-    const adapter = new PrismaD1(dbBinding);
-    client = new PrismaClient({ adapter });
+export async function queryD1<T = any>(sql: string, params: any[] = []): Promise<T[]> {
+  const db = getD1();
+  if (!db) {
+    console.warn("D1 Database binding 'DB' was not found. Returning empty array.");
+    return [];
   }
-
-  if (process.env.NODE_ENV !== 'production') {
-    globalThis.prismaGlobal = client;
+  try {
+    const stmt = db.prepare(sql).bind(...params);
+    const res = await stmt.all();
+    return (res.results || []) as T[];
+  } catch (error) {
+    console.error(`D1 query error for statement: ${sql}`, error);
+    return [];
   }
+}
 
-  return client;
+export async function runD1(sql: string, params: any[] = []): Promise<boolean> {
+  const db = getD1();
+  if (!db) {
+    console.warn("D1 Database binding 'DB' was not found. Mocking successful execution.");
+    return true;
+  }
+  try {
+    const stmt = db.prepare(sql).bind(...params);
+    await stmt.run();
+    return true;
+  } catch (error) {
+    console.error(`D1 execute error for statement: ${sql}`, error);
+    return false;
+  }
 }
