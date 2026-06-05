@@ -13,6 +13,20 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  experimental: {
+    optimizePackageImports: [
+      "@heroui/react",
+      "@heroui/styles",
+      "react-icons",
+      "framer-motion"
+    ]
+  },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.optimization.minimize = true;
+    }
+    return config;
+  }
 };
 
 export default nextConfig;

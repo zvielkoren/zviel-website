@@ -4,16 +4,16 @@
   "private": true,
   "packageManager": "pnpm@10.0.0",
   "scripts": {
-    "build": "next build",
+    "build": "next build --webpack",
     "dev": "next dev",
     "pages:build": "opennextjs-cloudflare build && mv .open-next/worker.js .open-next/_worker.js && cp -r .open-next/assets/* .open-next/ && node scripts/patch-worker.js",
     "start": "next start",
     "lint": "eslint .",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "preview": "pnpm run pages:build && wrangler pages dev .open-next",
     "wrangler": "echo",
     "postinstall": "prisma generate",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "deploy": "pnpm run pages:build && wrangler pages deploy .open-next",
+    "upload": "pnpm run pages:build && wrangler pages deploy .open-next",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
