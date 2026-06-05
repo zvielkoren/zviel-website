@@ -28,6 +28,7 @@ import * as _async_hooks from "node:async_hooks";
 import * as _path from "node:path";
 import * as _crypto from "node:crypto";
 import * as _stream from "node:stream";
+import * as _stream_web from "node:stream/web";
 import * as _buffer from "node:buffer";
 import * as _util from "node:util";
 import * as _events from "node:events";
@@ -35,6 +36,10 @@ import * as _url from "node:url";
 import * as _timers from "node:timers";
 import * as _timers_promises from "node:timers/promises";
 import * as _os from "node:os";
+import * as _string_decoder from "node:string_decoder";
+import * as _diagnostics_channel from "node:diagnostics_channel";
+import * as _perf_hooks from "node:perf_hooks";
+import * as _zlib from "node:zlib";
 
 // The ultimate mock Proxy: returns itself for all property access, function calls, and new instances.
 // We use a standard function as the target to make the Proxy constructable (arrow functions are not constructable).
@@ -51,6 +56,7 @@ globalThis.require = function(name) {
     "node:path": _path, "path": _path,
     "node:crypto": _crypto, "crypto": _crypto,
     "node:stream": _stream, "stream": _stream,
+    "node:stream/web": _stream_web, "stream/web": _stream_web,
     "node:buffer": _buffer, "buffer": _buffer,
     "node:util": _util, "util": _util,
     "node:events": _events, "events": _events,
@@ -58,12 +64,25 @@ globalThis.require = function(name) {
     "node:timers": _timers, "timers": _timers,
     "node:timers/promises": _timers_promises, "timers/promises": _timers_promises,
     "node:os": _os, "os": _os,
+    "node:string_decoder": _string_decoder, "string_decoder": _string_decoder,
+    "node:diagnostics_channel": _diagnostics_channel, "diagnostics_channel": _diagnostics_channel,
+    "node:perf_hooks": _perf_hooks, "perf_hooks": _perf_hooks,
+    "node:zlib": _zlib, "zlib": _zlib,
     "node:fs": ultimateMock, "fs": ultimateMock,
     "node:vm": ultimateMock, "vm": ultimateMock,
     "node:child_process": ultimateMock, "child_process": ultimateMock,
     "node:inspector": ultimateMock, "inspector": ultimateMock,
     "node:http": ultimateMock, "http": ultimateMock,
-    "node:https": ultimateMock, "https": ultimateMock
+    "node:https": ultimateMock, "https": ultimateMock,
+    "node:module": ultimateMock, "module": ultimateMock,
+    "node:net": ultimateMock, "net": ultimateMock,
+    "node:tls": ultimateMock, "tls": ultimateMock,
+    "node:dns": ultimateMock, "dns": ultimateMock,
+    "node:readline": ultimateMock, "readline": ultimateMock,
+    "node:querystring": ultimateMock, "querystring": ultimateMock,
+    "node:punycode": ultimateMock, "punycode": ultimateMock,
+    "node:assert": ultimateMock, "assert": ultimateMock,
+    "node:constants": ultimateMock, "constants": ultimateMock
   };
 
   if (name in map) {
